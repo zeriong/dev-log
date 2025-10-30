@@ -1,4 +1,63 @@
----
+ ---
+
+## 📑 2025.10.30
+
+### # 리액트의 render phase와 commit phase
+
+#### `개요: 매일메일이라는 서비스를 구독했는데 얼마전에 공부했던 react의 렌더링, fiber architecture의 연장선으로 보여 학습`
+
+- render phase는 변경된 상태나 props에 따라 어떤 UI가 변경되어야 할지 결정하는 단계
+  - DOM을 실제로 업데이트하지 않고 Virture DOM에서 변경사항을 순수하게 계산하는 과정
+  - 성능에 영향을 주지 않도록 중단하거나 다시 실행이 가능한 상태<br>
+    ➔ `React18부터 제공하는 Concurrent Mode로 비동기적 처리 가능`
+- commit phase는 render phase에서 변경이 결정된 UI를 DOM에 반영하고 브라우저에 렌더링하는 단계
+  - DOM업데이트 이후엔 useEffect같은 사이드이팩트를 발생시키는 훅을 실행
+- 요악:<br>
+  `render phase - Virture DOM을 통해 변경사항 계산`<br>
+  `commit phase - 결정된 변경사항을 DOM에 업데이트 후 사이드 이팩트 훅을 실행`
+
+### # render phase와 commit phase가 동기화될 때의 특징
+
+- 단계적 진행
+  - render phase가 끝난 후 즉시 commit phase가 실행되는 것이 아닌, 우선순위가 높은 작업을 먼저 처리 가능<br>
+    `동기화가 필요한 작업을 효율적으로 관리하여 사용자 경험을 개선`
+- 병목관리
+  - render phase에서 모든 변경 사항이 fiber Tree에 준비된 상태로 commit phase로 넘어감<br>
+    `render ➔ commit 단계적 일관성 유지 가능`<br>
+    `UI의 변경이 정확하게 동기화 되고 불필요한 리렌더링 방지 가능`
+
+#### # fiber tree
+- React의 렌더링 엔진의 핵심 구조로 컴포넌트를 효율적으로 관리하기 위한 내부 자료 구조
+- 어떤 컴포넌트를, 어떻게 업데이트지를 계산하기 위한 실행 단위의 트리 구조
+- Fiber 노드 하나는 하나의 React 컴포넌트를 표현함
+  - state, props, effect, 자식/부모요소 관계, 우선순위 등을 정보로 담고 있음<br>
+
+```
+Fiber Tree는 Current Tree와 Work-in-Progress-tree(WIP Tree)가 존재한다.
+
+[ Current Tree ]: 현재 화면을 표현하고 있는 Fiber Tree
+[ WIP Tree ]: 새로운 렌더링 결과를 계산하고 있는 Fiber Tree
+
+1. render phase
+  - state/props 변경을 감지
+  - 새로운 Fiber Tree를 생성하며 diff를 계산
+
+2. commit phase
+  - 변경이 결정되면 WIP Tree를 Current Tree로 교체하 DOM 업데이트
+
+3. 화면 갱신 완료
+```
+
+### * React는 fiber tree를 통해 작업을 쪼개고, 우선순위 기반으로 스케줄링이 가능해졌다.
+`( Fiber Architecture의 존재 의의 )`
+
+<br>
+
+#### 🔍 [ [리액트의 render phase와 commit phase에 대해서 설명해주세요.](https://www.maeil-mail.kr/question/30) ]
+
+<br>
+
+ ---
 
 ## 📑 2025.10.29
 
@@ -18,9 +77,9 @@
 - 리액트 규칙에 위반된 경우 react-compiler가 정상적용이 되지 않을 수 있기 때문에 ESLint의 규칙을 준수하는 것 또한 핵심 요소 중 하나라고 언급함.
 
 
- #### 🔍 [ [수코딩 - React Compiler 1.0 완벽 정리｜드디어 베타 끝!](https://www.youtube.com/watch?v=4WyLSzwRMGg) ]
+#### 🔍 [ [수코딩 - React Compiler 1.0 완벽 정리｜드디어 베타 끝!](https://www.youtube.com/watch?v=4WyLSzwRMGg) ]
 
- <br>
+<br>
 
  ---
 
