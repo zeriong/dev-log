@@ -1,5 +1,3 @@
- ---
-
 ## 📑 2025.10.31 `( 🎃Happy Halloween )`
 
 ### # AWS 연쇄 폭발 사건 관련 유튜브 시청
@@ -8,26 +6,27 @@
 
 - EPIC GAME, EA서버 등 AWS를 주로 사용하는 많은 서비스가 AWS서버에 접근할 수 없는 문제가 생겼다...
 
-### * DynamoDB 폭발의 이유 (DNS 이슈)
+### \* DynamoDB 폭발의 이유 (DNS 이슈)
+
 - **\*EC2 (서버형 컴퓨터 대여) -** **DynamoDB**를 이용해 대여 가능한 컴퓨터 목록을 관리했기 때문에 **하나의 트랜젝션이 과하게 지연되는 문제**로 지연된 데이터가 삭제되어 처리 불가 상태가 되면서 **새로운 컴퓨터에 접근 자체가 불가능**해져버렸다.
 
 - **\*컴퓨터 렌탈 담당 서비스 -** DynamoDB 복구 후, **그동안 밀렸던 컴퓨터 렌탈 요청이 한꺼번에 쏟아져** 들어와서 렌탈 담당 서비스가 과부하로 폭발
-<br> ***(3시간에 걸쳐 복구)***
+  <br> **_(3시간에 걸쳐 복구)_**
 
 - **\*EC2 네트워크 설정 -** 컴퓨터들의 네트워크 설정 정보가 **지연되어 처리가 늦어지면서 렌탈 컴퓨터들의 인터넷이 안되는 문제 발생**
-<br> ***(3시간에 걸쳐 복구)***
+  <br> **_(3시간에 걸쳐 복구)_**
 
 - **\*NLB (트래픽 분산 서비스) -** **EC2가 불안정**해지자, EC2의 상태를 주기적으로 확인(헬스 체크)하는 **NLB 노드들도 불안정해져서 지연 시간이 발생**
-<br> ***(3시간에 걸쳐 복구)***
+  <br> **_(3시간에 걸쳐 복구)_**
 
-- **\*Lambda (코드 실행 서비스) -** 코드 정보들을 ***DynamoDB에 저장***해 두었기 때문에 **똑같이 폭발**
-<br> ***(3시간에 걸쳐 복구)***
+- **\*Lambda (코드 실행 서비스) -** 코드 정보들을 **_DynamoDB에 저장_**해 두었기 때문에 **똑같이 폭발**
+  <br> **_(3시간에 걸쳐 복구)_**
 
 - **\*SQS (메시지 대기열) -** Lambda 관련 **백로그가 과하게 많이 쌓여 처리에 시간이 오래 걸리는 문제 발생**
-<br> ***(3시간에 걸쳐 복구)***
+  <br> **_(3시간에 걸쳐 복구)_**
 
 - **\*ECS/EKS (도커 컨테이너 서비스) -** **EC2를 기반**으로 하기 때문에 **컨테이너들이 시작이 안 되어서 웹 서버들이 마비되는 문제 발생**
-<br> ***(3시간에 걸쳐 복구)***
+  <br> **_(3시간에 걸쳐 복구)_**
 
 - **\*AWS 로그/고객센터 -** 해당 기능 구현에도 **DynamoDB를 사용했기 때문에 접속이 안 되는 사태가 발생**
 
@@ -70,6 +69,7 @@
     `UI의 변경이 정확하게 동기화 되고 불필요한 리렌더링 방지 가능`
 
 #### # fiber tree
+
 - React의 렌더링 엔진의 핵심 구조로 컴포넌트를 효율적으로 관리하기 위한 내부 자료 구조
 - 어떤 컴포넌트를, 어떻게 업데이트지를 계산하기 위한 실행 단위의 트리 구조
 - Fiber 노드 하나는 하나의 React 컴포넌트를 표현함
@@ -91,7 +91,8 @@ Fiber Tree는 Current Tree와 Work-in-Progress-tree(WIP Tree)가 존재한다.
 3. 화면 갱신 완료
 ```
 
-### * React는 fiber tree를 통해 작업을 쪼개고, 우선순위 기반으로 스케줄링이 가능해졌다.
+### \* React는 fiber tree를 통해 작업을 쪼개고, 우선순위 기반으로 스케줄링이 가능해졌다.
+
 `( Fiber Architecture의 존재 의의 )`
 
 <br>
@@ -100,7 +101,7 @@ Fiber Tree는 Current Tree와 Work-in-Progress-tree(WIP Tree)가 존재한다.
 
 <br>
 
- ---
+---
 
 ## 📑 2025.10.29
 
@@ -119,12 +120,11 @@ Fiber Tree는 Current Tree와 Work-in-Progress-tree(WIP Tree)가 존재한다.
 - 앞으로 새로운 리액트 앱은 반드시 react-compiler를 사용해야 한다고 권고하고 있다.
 - 리액트 규칙에 위반된 경우 react-compiler가 정상적용이 되지 않을 수 있기 때문에 ESLint의 규칙을 준수하는 것 또한 핵심 요소 중 하나라고 언급함.
 
-
 #### 🔍 [ [수코딩 - React Compiler 1.0 완벽 정리｜드디어 베타 끝!](https://www.youtube.com/watch?v=4WyLSzwRMGg) ]
 
 <br>
 
- ---
+---
 
 ## 📑 2025.10.28
 
@@ -136,17 +136,16 @@ Fiber Tree는 Current Tree와 Work-in-Progress-tree(WIP Tree)가 존재한다.
 - Reconciliation이란 React에서 어떤 부분들이 변해야할지 서로 다른 두 개의 트리를 비교하는데 사용하는 알고리즘이며 Virture DOM 뒤에서 실행된다.
 - 리스트는 key를 이용하여 비교되며 key는 stable하고 예측 가능하며, 동일한 리스트 내에서 unique해야 한다. (children)
 - fiber는 스케줄링에 강점을 갖도록 하는 것으로 아래 조건을 만족해야 한다.
-     - 작업을 멈추고 나중에 다시 돌아오기
-     - 다른 유형의 일에 우선권 부여하기
-     - 이전에 완성한 작업을 재사용하기
-     - 더 이상 필요하지 않은 작업을 중단하기
+  - 작업을 멈추고 나중에 다시 돌아오기
+  - 다른 유형의 일에 우선권 부여하기
+  - 이전에 완성한 작업을 재사용하기
+  - 더 이상 필요하지 않은 작업을 중단하기
 - React가 변경을 감지하는 것은key, tag의 type, props가 있다.
 - 실제 DOM 변경은 commit 단계에서만 일어나며, Fiber는 변경 작업(effect list)을 모아 커밋 시 적용
 - fiber는 각 노드를 **작은 작업 단위(unit of work, fiber)** 로 만들어 중단/재개, 우선순위 스케줄링, 시간 분할이 가능하게 함.
 - **실제 DOM 변경은 commit 단계에서만 이루어지고, render(reconciliation) 단계는 비교와 작업 생성만 수행.**
 - setState는 update 트리거다.
 
- #### 🔍 [ [acdlite - React Fiber Architecture](https://github.com/acdlite/react-fiber-architecture) ]
+#### 🔍 [ [acdlite - React Fiber Architecture](https://github.com/acdlite/react-fiber-architecture) ]
 
  <br>
-
