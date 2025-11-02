@@ -1,3 +1,20 @@
+## 📑 2025.11.02
+
+### # Edge case & Corner case 용어 정리
+
+- Edge case( 경계 조건 )
+  - 주로 예상하기 어려운 특이케이스를 엣지케이스라고 한다.<br>
+  `글자 오버플로우, 빠른 입력 이벤트, 디바운스/스로틀링 타이밍 오차 등 `
+- Corner case( 복합 경계 조건 )
+  - 2가지 이상의 Edge case가 동시에 발생하는 케이스를 코너케이스라고 한다.<br>
+  `특정 validate가 필요한 인풋에 텍스트를 붙여넣기를 했을 때 지정 length를 넘기며 validate가 무시되는 경우 등`
+
+#### 🔍 [ [학습에 참고한 블로그 출처: https://daryeou.tistory.com/203#google_vignette](https://daryeou.tistory.com/203#google_vignette) ]
+
+<br>
+
+ ---
+
 ## 📑 2025.11.01
 
 ### # 프론트 최적화 기법 관련 유튜브 시청
@@ -9,22 +26,16 @@
    - 이미지, 폰트, js, css 캐시설정 - cache-control / ETag
    - CDN 활용
 
-    <br>
-
 2. 이미지 최적화
 
    - 주로 LCP(Largest Contentful Paint)를 중요한 지표로 생각한다.
    - avif 또는 webp를 사용
    - 사이즈별 리사이즈와 lazy loading 활용용
 
-   <br>
-
 3. 폰트 최적화
 
    - woff2 적극활용
    - fout활용 + size adust로 자연스럽게 조정
-
-   <br>
 
 4. 더 나은 번들
 
@@ -32,13 +43,9 @@
    - tree shacking 적용 되도록 설정
    - rollup-plugin-visualizer과 같은 라이브러리로 번들 사이즈를 시각화하여 확인
 
-   <br>
-
 5. 데이터 페칭 최적화
 
    - 가능한 병렬처리(Promise.all)를 활용하고 SWR, React Query 등 캐싱기능을 활용하면 좋다.
-
-    <br>
 
 6. 렌더링 최적화
 
@@ -49,15 +56,11 @@
    - 어쩔 수 없는 경우에 읽기-쓰기를 반복하는 것을 지양해야 함
      `반복문 처리가 필요한 경우 변수에 데이터를 담고 마지막에 적용하는 등`
 
-   <br>
-
 7. 프리페칭( 사전로딩 )
 
    - IntersectionObserver를 활용해서 특정 요소가 보일 때 head에 미리 link를 넣기도 가능
    - api를 담아두기
      `reactQuery - prefetchQuery 미리 api를 담아둘 수 있음`
-
-   <br>
 
 - **\*성능 모니터링 자동화**
 
