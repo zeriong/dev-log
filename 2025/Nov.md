@@ -1,3 +1,43 @@
+## 📑 2025.11.04
+
+### # Concurrent Rendering
+```
+동시성 렌더링: 렌더링을 긴급/전환 업데이트로 분류하여 긴급한 렌더링 작업을 우선 업데이트 함
+이는 속도 연산 속도 개선이 아닌, 우선순위를 만들어 긴급한 업데이트를 우선 처리하여 UI 차단을 최소화 시키는 것이다. 
+
+startTransition:
+startTransition로 감싸진 set 함수는 전환 업데이트로 처리됨
+
+useTransition:
+startTransition함수, isPending을 반환하며 지연 중일 경우 isPending는 true가 됨
+
+useDeferredValue:
+startTransition을 사용하지 못하고나 props를 지연하고 싶을 때 사용하며 반환 값으로 화면 업데이트 시 지연처리 함
+```
+- React19에서는 Concurrent Rendering을 기본모드로 적용된다.<br>
+
+- React17 이전 버전에서는 렌더링이 동기적으로 작동했다.<br>
+`컴포넌트 트리 전체를 렌더링할 때 도중에 멈출 수 없어 한번 실행되면 끝까지 렌더링을 완료해야 했음`<br>
+`- 대형컴포넌트 트리에서는 렌더링이 잠시 freeze 되는 문제가 있음`<br>
+`- 사용자가 스크롤, 입력 등 다른 작업을 하더라도 렌더링이 끝날 때까지 응답이 늦어짐`
+
+<br>
+
+**\*활용법** <br>
+```
+지연시키고 싶은 dispatcher를 Concurrent rendering hook(startTransition/useDeferredValue)
+으로 감싸면 해당 dispatcher는 전환(후순위) 업데이트가 되어 내부 Concurrent rendering hook으로
+감싸지 않은 dispatcher와 로직을 실행한 후 마지막으로 dispatch된다.
+```
+
+<br>
+
+#### 🔍 [ [학습에 참고한 출처: https://beomy.github.io/tech/react/concurrent-rendering/ ](https://beomy.github.io/tech/react/concurrent-rendering/) ]
+
+<br>
+
+ ---
+
 ## 📑 2025.11.02
 
 ### # Edge case & Corner case 용어 정리
