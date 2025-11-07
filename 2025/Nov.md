@@ -1,3 +1,22 @@
+
+## 📑 2025.11.07
+
+### # CommonJS와 ES Module의 차이점
+
+- CommonJS
+  - `require`키워드를 사용해 모듈을 가져오고 동기적으로 작동하며 주로 Node.js 환경에서 서버를 구성할 때 많이 사용해왔다.<br>
+  `동기적으로 작동하기 때문에 모듈이 로드될 때까지 다음 코드가 실행되지 않고 기다린다.`
+- ESM( ES Module )
+  - ES6부터 도입된 기술로 브라우저와 Node.js 모두 활용 가능하며 모듈을 비동기적으로 로드한다.<br>
+    `모듈을 가져올 때는 "import"를 사용하고 내보낼 땐 export를 사용한다.`<br>
+    `ESM은 정적 분석이 가능하여 트리쉐이킹 최적화 작업에 유리하다.`
+
+#### 🔍 [ [인용: https://www.maeil-mail.kr/question/38](https://www.maeil-mail.kr/question/38) ]
+
+<br>
+
+ ---
+
 ## 📑 2025.11.04
 
 ### # Concurrent Rendering
