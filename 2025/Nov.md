@@ -1,3 +1,37 @@
+## 📑 2025.11.09
+
+### # React - Activity
+
+```
+<Activity> 컴포넌트는 기존의 조건부 렌더링({condition && <Component />})의 대안으로
+컴포넌트를 완전히 언마운트하지 않고 숨길 수 있는 방법을 제공한다.
+
+마운트/언마운트 시 cleanup 등은 제대로 실행되면서 mode가 hidden일 때 사용자에게 보이지 않지만
+state가 휘발되지 않고 유지되는 기능적 장점이 있다.
+( 이전에는 필요하다면 해당 기능을 직접 구현해야 했지만 이젠 Activity 컴포넌트를 통해 활용 가능 )
+```
+
+- #### visible mode
+  - 자식 컴포넌트를 정상적으로 렌더링
+  - 이펙트(useEffect 등)를 마운트
+  - 업데이트를 정상 우선순위로 처리
+  - 사용자에게 보임
+
+
+- #### hidden mode
+  - 자식 컴포넌트를 화면에서 숨김
+  - 이펙트를 언마운트 (cleanup 함수 실행)
+  - 모든 업데이트를 낮은 우선순위로 지연 처리
+  - 중요: 컴포넌트 상태는 그대로 유지됨
+
+<br>
+
+#### 🔍 [ [인용: ZeroChoTV - React가 일을 하기 시작했다 - Activity (React 19.2 신기능)](https://youtube.com/shorts/RlEppB9pan8?si=gQgRtKWfLBagXxYS) ]
+
+<br>
+
+---
+
 ## 📑 2025.11.08
 
 ### # 검색창에 google.com을 치면 일어나는 일
