@@ -1,3 +1,53 @@
+## 📑 2025.11.10
+
+### # React - useEffectEvent
+
+`useEffectEvent`는 기존 useEffect에서 자주 발생하던 " ***의존성 관리와 최신 상태 참조*** " 의 충돌을 해결하기 위한 새로운 패턴이다.<br>
+이를 통해 **불필요한 재연결**이나 **이중 effect 실행 없이, 항상 최신 상태를 참조하는 안정적인 로직**을 작성할 수 있다.
+
+<br>
+
+```javascript
+// 기존 예제 코드
+function ChatRoom({ roomId, theme }) {
+  useEffect(() => {
+    const connection = createConnection(serverUrl, roomId);
+    connection.on('connected', () => {
+      showNotification('Connected!', theme);
+    });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId, theme]); // theme 변경 시에도 재연결하게 됨
+}
+```
+
+```javascript
+// useEffectEvent를 활용하여 우아한 분리가 가능해짐
+function ChatRoom({ roomId, theme }) {
+  // 내부 state는 실행 시점에서 항상 최신 상태를 참조하게 됨
+  const onConnected = useEffectEvent(() => {
+    showNotification('Connected!', theme);
+  });
+
+  useEffect(() => {
+    const connection = createConnection(serverUrl, roomId);
+    connection.on('connected', () => {
+      onConnected();
+    });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId]); // theme은 의존성 배열에서 제외하여 분리
+}
+```
+
+<br>
+
+#### 🔍 [ [인용: ZeroChoTV - React 필수 기능 - useEffectEvent (React 19.2 신기능)](https://youtube.com/shorts/RlEppB9pan8?si=gQgRtKWfLBagXxYS) ]
+
+<br>
+
+---
+
 ## 📑 2025.11.09
 
 ### # React - Activity
