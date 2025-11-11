@@ -1,3 +1,121 @@
+<!-- Template !
+
+## 📑 2025.11.11
+
+### # React - 템플릿
+
+```
+템플릿
+```
+
+- #### 템플릿
+  - 자식 컴포넌트를 정상적으로 렌더링
+
+
+- #### 템플릿
+  - 자식 컴포넌트를 화면에서 숨김
+
+<br>
+
+#### 🔍 [ [인용: 템플릿](httpswwwgooglecom) ]
+
+<br>
+
+---
+
+-->
+
+
+
+
+## 📑 2025.11.11
+
+### # JS - Symbol
+
+- Symbol은 유일한(Unique) 식별자를 생성하는 원시 타입(Primitive Type)
+- 객체의 숨김 속성 키(Hidden Property Key) 를 만들 때 주로 사용
+- Symbol()로 생성할 때마다 항상 새로운 값이 만들어짐
+- 절대 중복되지 않기 때문에 server-side가 존재하는 환경에서 전역 공유 방지가 가능<br>
+  `나는 Next.js에서 전역 공유 방지용으로 활용한 경험이 있다.`
+- 직접 접근하지 않는 한 외부에서 식별 불가능<br>
+  `보안상 유리 (XSS 완화)`
+
+<br>
+
+#### * 내가 활용한 예제 
+`공용 dialog symbols`
+```javascript
+/**
+ * 목적: Dialog resolve 함수를 저장하기 위한 Symbol 키 정의
+ * 장점: 전역 오염 방지, 충돌 방지, 타입 안정성 향상
+ */
+
+// Confirm Dialog용 Symbol
+export const CONFIRM_DIALOG_RESOLVE_SYMBOL = Symbol.for(
+  "app.dialog.confirm.resolve"
+);
+
+// Alert Dialog용 Symbol
+export const ALERT_DIALOG_RESOLVE_SYMBOL = Symbol.for(
+  "app.dialog.alert.resolve"
+);
+
+// Window 타입 확장 (TypeScript 지원)
+declare global {
+  interface Window {
+    [CONFIRM_DIALOG_RESOLVE_SYMBOL]?: (value: boolean) => void;
+    [ALERT_DIALOG_RESOLVE_SYMBOL]?: (value: boolean) => void;
+  }
+}
+
+/**
+ * Symbol을 사용하여 resolve 함수 저장
+ * @param symbol - CONFIRM_DIALOG_RESOLVE_SYMBOL 또는 ALERT_DIALOG_RESOLVE_SYMBOL
+ * @param resolver - Promise resolve 함수
+ */
+export const setDialogResolver = (
+  symbol: symbol,
+  resolver: (value: boolean) => void
+): void => {
+  if (typeof window !== "undefined") {
+    (window as any)[symbol] = resolver;
+  }
+};
+
+/**
+ * Symbol을 사용하여 resolve 함수 가져오기
+ * @param symbol - CONFIRM_DIALOG_RESOLVE_SYMBOL 또는 ALERT_DIALOG_RESOLVE_SYMBOL
+ * @returns resolve 함수 또는 undefined
+ */
+export const getDialogResolver = (
+  symbol: symbol
+): ((value: boolean) => void) | undefined => {
+  if (typeof window !== "undefined") {
+    return (window as any)[symbol];
+  }
+  return undefined;
+};
+
+/**
+ * Symbol을 사용하여 resolve 함수 제거
+ * @param symbol - CONFIRM_DIALOG_RESOLVE_SYMBOL 또는 ALERT_DIALOG_RESOLVE_SYMBOL
+ */
+export const clearDialogResolver = (symbol: symbol): void => {
+  if (typeof window !== "undefined") {
+    delete (window as any)[symbol];
+  }
+};
+
+```
+
+<br>
+
+#### 🔍 [ [인용: Inpa Dev - [JS] 📚 자바스크립트 자료형 Symbol 🚩 정리 - Inpa Dev 👨‍💻](https://inpa.tistory.com/entry/JS-%F0%9F%93%9A-%EC%9E%90%EB%A3%8C%ED%98%95-Symbol-%F0%9F%9A%A9-%EC%A0%95%EB%A6%AC) ]
+
+<br>
+
+---
+
 ## 📑 2025.11.10
 
 ### # React - useEffectEvent
