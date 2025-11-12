@@ -25,6 +25,15 @@
 
 -->
 
+## 📑 2025.11.13
+
+### # openapi-generator-cli를 활용한 사내 api 자동 생성 구현 과정 포스팅
+
+#### ✍🏻 [ [zeriong - [ openapi-generator-cli ] 사내 API 생성 자동화 도입기](https://zeriong.tistory.com/88) ]
+
+<br>
+
+---
 
 ## 📑 2025.11.12
 
@@ -44,14 +53,14 @@
 
 <br>
 
-#### * 간단한 예시
+#### \* 간단한 예시
 
-| 역할 | 설명 |
-|------|------|
-| `openapi.json` | 백엔드에서 정의한 API 스펙 (Swagger 문서) |
-| `orval.config.ts` | 생성 설정 파일 (입력/출력, 옵션 등) |
-| `npx orval` | 명령 실행 시 자동 코드 생성 |
-| `useGetUsers()` | 예시: 자동 생성된 React Query 훅 |
+| 역할              | 설명                                      |
+| ----------------- | ----------------------------------------- |
+| `openapi.json`    | 백엔드에서 정의한 API 스펙 (Swagger 문서) |
+| `orval.config.ts` | 생성 설정 파일 (입력/출력, 옵션 등)       |
+| `npx orval`       | 명령 실행 시 자동 코드 생성               |
+| `useGetUsers()`   | 예시: 자동 생성된 React Query 훅          |
 
 <br>
  
@@ -67,16 +76,18 @@
 
 <br>
 
-#### * 장점
-  - 타입 안정성(Type-Safe)
-  - 명세 변경 시 자동 반영
-  - 중복 코드 제거 및 일관성 유지
-  - React Query 등과 자연스럽게 통합 가능
+#### \* 장점
 
-#### * 단점
-  - Swagger 명세 최신화 필수
-  - 생성 코드 버전 관리 필요
-  - 공통 에러 핸들링 및 인터셉터 고려
+- 타입 안정성(Type-Safe)
+- 명세 변경 시 자동 반영
+- 중복 코드 제거 및 일관성 유지
+- React Query 등과 자연스럽게 통합 가능
+
+#### \* 단점
+
+- Swagger 명세 최신화 필수
+- 생성 코드 버전 관리 필요
+- 공통 에러 핸들링 및 인터셉터 고려
 
 <br>
 
@@ -100,8 +111,10 @@
 
 <br>
 
-#### * 내가 활용한 예제 
+#### \* 내가 활용한 예제
+
 `공용 dialog symbols`
+
 ```javascript
 /**
  * 목적: Dialog resolve 함수를 저장하기 위한 Symbol 키 정의
@@ -178,7 +191,7 @@ export const clearDialogResolver = (symbol: symbol): void => {
 
 ### # React - useEffectEvent
 
-`useEffectEvent`는 기존 useEffect에서 자주 발생하던 " ***의존성 관리와 최신 상태 참조*** " 의 충돌을 해결하기 위한 새로운 패턴이다.<br>
+`useEffectEvent`는 기존 useEffect에서 자주 발생하던 " **_의존성 관리와 최신 상태 참조_** " 의 충돌을 해결하기 위한 새로운 패턴이다.<br>
 이를 통해 **불필요한 재연결**이나 **이중 effect 실행 없이, 항상 최신 상태를 참조하는 안정적인 로직**을 작성할 수 있다.
 
 <br>
@@ -188,8 +201,8 @@ export const clearDialogResolver = (symbol: symbol): void => {
 function ChatRoom({ roomId, theme }) {
   useEffect(() => {
     const connection = createConnection(serverUrl, roomId);
-    connection.on('connected', () => {
-      showNotification('Connected!', theme);
+    connection.on("connected", () => {
+      showNotification("Connected!", theme);
     });
     connection.connect();
     return () => connection.disconnect();
@@ -202,12 +215,12 @@ function ChatRoom({ roomId, theme }) {
 function ChatRoom({ roomId, theme }) {
   // 내부 state는 실행 시점에서 항상 최신 상태를 참조하게 됨
   const onConnected = useEffectEvent(() => {
-    showNotification('Connected!', theme);
+    showNotification("Connected!", theme);
   });
 
   useEffect(() => {
     const connection = createConnection(serverUrl, roomId);
-    connection.on('connected', () => {
+    connection.on("connected", () => {
       onConnected();
     });
     connection.connect();
@@ -238,11 +251,11 @@ state가 휘발되지 않고 유지되는 기능적 장점이 있다.
 ```
 
 - #### "visible" mode
+
   - 자식 컴포넌트를 정상적으로 렌더링
   - 이펙트(useEffect 등)를 마운트
   - 업데이트를 정상 우선순위로 처리
   - 사용자에게 보임
-
 
 - #### "hidden" mode
   - 자식 컴포넌트를 화면에서 숨김
