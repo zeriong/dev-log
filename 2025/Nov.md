@@ -25,6 +25,16 @@
 
 -->
 
+## 📑 2025.11.15
+
+### # Python LLM 챗봇 서버 리팩터링 및 통신 취소 기능 구현 과정 포스팅
+
+#### ✍🏻 [ [zeriong - [ Python: Async HTTP ] 사내 LLM 챗봇 서버 비동기 전환을 통한 요청 취소 및 논블로킹 구조 개선기](https://zeriong.tistory.com/90) ]
+
+<br>
+
+---
+
 ## 📑 2025.11.14
 
 ### # Three.js Camera handling 트러블슈팅 과정 포스팅
