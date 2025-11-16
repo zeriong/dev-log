@@ -36,7 +36,7 @@
 
 <br>
 
-#### 🔍 [ [애플코딩 - 어이없는 AWS 연쇄 폭발 사건](https://youtu.be/ZDhEQcL5bYg?si=Q6uQsJXEcXiGannA) ]
+#### 🔍 [ [코딩애플 - 어이없는 AWS 연쇄 폭발 사건](https://youtu.be/ZDhEQcL5bYg?si=Q6uQsJXEcXiGannA) ]
 
 <br>
  
