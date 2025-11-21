@@ -29,9 +29,11 @@
 
 ### # React + Vite gzip 압축 최적화 과정 포스팅
 
-#### \* [ 2.74 MB ➔ 0.84 MB ] - 번들 사이즈 약 69.16% 최적화 경험
+- #### 번들사이즈: [ 1,025 KB ➔ 330 KB ] - 약 3.1배 감소 ( 67.8% )
+- #### 다운로드 속도: [ 794ms ➔ 169ms ] - 약 4.7배 단축 ( 78.7% )
+- #### LCP: [ 1.24s ➔ 0.58s ] - 약 2.1배 단축 ( 53.2% )
 
-#### ✍🏻 [ [zeriong - [ React: Gzip Compression ] 사내 서비스 gzip 압축으로 번들 사이즈 최적화 적용기](https://zeriong.tistory.com/92) ]
+#### ✍🏻 [ [zeriong - [ React: Gzip Compression ] 번들 사이즈 최적화로 UX향상 시키기](https://zeriong.tistory.com/92) ]
 
 <br>
 
