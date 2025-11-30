@@ -61,12 +61,17 @@
 #### \* 정리
 
 // undefined: 자바스크립트가 자동 할당
+```javascript
 let a;
 console.log(a); // undefined
+```
+
 
 // null: 개발자가 의도적으로 할당
+```javascript
 let b = null;
 console.log(b); // null
+```
 
 // 메모리 해제 유도
 let largeData = { /_ 대용량 데이터 _/ };
