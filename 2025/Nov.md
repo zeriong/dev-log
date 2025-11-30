@@ -74,8 +74,12 @@ console.log(b); // null
 ```
 
 // 메모리 해제 유도
+```javascript
 let largeData = { /_ 대용량 데이터 _/ };
-largeData = null; // 참조 끊기 → 가비지 컬렉션 대상<br>
+largeData = null; // 참조 끊기 → 가비지 컬렉션 대상
+```
+
+<br>
 
 #### 🔍 [ [매일메일 - undefined와 null의 차이점에 대해서 설명해주세요.](https://www.maeil-mail.kr/question/63) ]
 
