@@ -1,3 +1,90 @@
+## 📑 2025.12.04
+
+### # JavaScript - 함수 선언식과 함수 표현식의 차이점
+
+- 자바스크립트에서 함수를 정의하는 두 가지 방법
+- **주요 차이점: 호이스팅(Hoisting)**
+
+#### * 함수 선언식 (Function Declaration)
+
+- 이름이 있는 함수
+- **호이스팅이 발생**
+  - 자바스크립트 엔진이 코드 실행 전에 메모리에 로드
+  - 코드 내 어디서든 호출 가능
+  - 선언 위치보다 앞에서 호출해도 정상 작동
+
+```javascript
+// 선언 전 호출 가능 (호이스팅)
+console.log(add(2, 3)); // 5
+
+function add(a, b) {
+    return a + b;
+}
+```
+
+#### * 함수 표현식 (Function Expression)
+
+- **변수에 익명 함수를 할당**하는 방식
+- 할당된 변수명으로 호출
+- **호이스팅이 되지 않음**
+  - 변수에 할당된 이후에만 호출 가능
+  - 코드 흐름상 변수가 선언된 후에만 사용 가능
+  - 선언 전 호출 시 에러 발생
+ 
+```javascript
+// 선언 전 호출 불가능 (호이스팅 안됨)
+console.log(multiply(2, 3)); // ReferenceError: Cannot access 'multiply' before initialization
+
+const multiply = function (a, b) {
+    return a * b;
+};
+
+// 선언 후 호출 가능
+console.log(multiply(2, 3)); // 6#### * 비교 정리
+```
+
+| 구분 | 함수 선언식 | 함수 표현식 |
+|------|------------|------------|
+| 형태 | `function name() {}` | `const name = function() {}` |
+| 호이스팅 | 발생 (어디서든 호출 가능) | 안됨 (선언 후에만 호출) |
+| 사용 시점 | 코드 어디서든 | 변수 할당 이후만 |
+| 에러 | 선언 전 호출 시 정상 작동 | 선언 전 호출 시 ReferenceError |
+
+#### * 실무 활용
+
+```javascript
+// 함수 선언식 - 호이스팅 활용
+init(); // 정상 작동
+
+function init() {
+  console.log('초기화 완료');
+}
+
+// 함수 표현식 - 명확한 코드 흐름
+const config = {
+  apiUrl: 'https://api.example.com'
+};
+
+const fetchData = function() {
+  return fetch(config.apiUrl);
+};
+
+fetchData(); // config 이후에 호출하여 명확한 의존성#### * 정리
+```
+
+- **함수 선언식**: 호이스팅이 되어 코드 어디서든 호출 가능
+- **함수 표현식**: 변수에 할당된 후에만 사용 가능
+- 선택 기준: 코드 구조와 의도에 따라 적절히 선택
+
+<br>
+
+#### 🔍 [ [매일메일 - 함수 선언식과 함수 표현식의 차이점에 대해서 설명해주세요.](https://www.maeil-mail.kr/question/68) ]
+
+<br>
+
+---
+
+
 ## 📑 2025.12.03
 
 ### # JavaScript - Promise
