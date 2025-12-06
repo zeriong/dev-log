@@ -1,3 +1,124 @@
+## 📑 2025.12.06
+
+### # React - Error Boundary
+
+- **컴포넌트에서 발생하는 오류를 잡아내고, 전체 애플리케이션이 다운되는 것을 방지하기 위한 특수한 컴포넌트**
+- 오류 발생 시 대체 UI를 제공하여 애플리케이션의 신뢰성과 사용자 경험 향상
+- **클래스형 컴포넌트에서만 사용 가능**
+
+#### * Error Boundary의 필요성
+
+- React는 기본적으로 비동기 작업의 오류를 자동으로 처리하지 않음
+- 오류 발생 시 문제점:
+  - 페이지 전체가 하얗게 변함
+  - 사용자 입장에서 알 수 없는 화면 표시
+  - 사용자 경험 크게 저해
+  - 대규모 애플리케이션의 신뢰성 문제
+
+#### * Error Boundary의 역할
+
+- **에러가 발생한 영역에서 대체 UI를 표시**
+- **애플리케이션의 나머지 부분은 정상 동작**
+- 오류가 발생한 컴포넌트만 대체 UI로 전환
+- 애플리케이션의 안정성 유지
+- 사용자에게 오류 메시지나 대체 화면 제공
+
+#### * 구현 방법
+
+클래스형 컴포넌트의 두 가지 라이프사이클 메서드 사용:
+
+1. **getDerivedStateFromError**
+   - 오류 발생 시 상태 업데이트
+   - 대체 UI를 렌더링하도록 상태 변경
+
+2. **componentDidCatch**
+   - 오류 정보를 로깅
+   - 에러 리포팅 서비스에 전송 가능
+
+```javascript
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    // 다음 렌더링에서 대체 UI를 표시하도록 상태 업데이트
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // 오류 로깅
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // 대체 UI 렌더링
+      return <h1>문제가 발생했습니다. 잠시 후 다시 시도해주세요.</h1>;
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+#### * 사용 예시
+```javascript
+function App() {
+  return (
+    <ErrorBoundary>
+      <MyComponent />
+    </ErrorBoundary>
+  );
+}
+```
+
+#### * 선언형 처리의 의미
+
+- **"무엇을 해야 하는지"를 정의하는 방식**
+- "어떻게 할지"에 대한 세부 절차를 직접 작성하지 않아도 됨
+- 예: "이 컴포넌트가 오류를 감지하면 특정 대체 UI를 보여준다"
+- 실제 오류 처리 절차는 컴포넌트가 알아서 처리
+
+#### * 유지 보수성 향상 이유
+
+1. **높은 가독성**
+   - 선언형 코드가 명령형 코드보다 직관적이고 간결
+   - Error Boundary로 감싼 영역의 에러 처리 방식을 한눈에 파악 가능
+
+2. **명확한 관심사 분리**
+   - 비즈니스 로직과 에러 처리 로직이 명확하게 분리
+   - 코드의 복잡성 감소
+
+3. **재사용성**
+   - Error Boundary를 여러 컴포넌트에 재사용 가능
+   - 일관된 에러 처리 패턴 유지
+
+#### * 장점 정리
+
+- 애플리케이션 전체 다운 방지
+- 부분적 오류 격리 (오류 발생 영역만 영향)
+- 사용자 친화적 에러 메시지 제공
+- 선언형 에러 처리로 코드 가독성 향상
+- 유지 보수성 개선
+
+#### * 주의사항
+
+Error Boundary가 **캐치하지 못하는** 에러:
+- 이벤트 핸들러 내부의 에러
+- 비동기 코드 (setTimeout, Promise 등)
+- 서버 사이드 렌더링
+- Error Boundary 자체에서 발생한 에러
+
+<br>
+
+#### 🔍 [ [매일메일 - Error Boundary가 무엇이며, 이를 사용하는 이유는 무엇인가요?](https://www.maeil-mail.kr/question/75) ]
+
+<br>
+
+---
+
 ## 📑 2025.12.04
 
 ### # JavaScript - 함수 선언식과 함수 표현식의 차이점
