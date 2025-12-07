@@ -1,3 +1,95 @@
+## 📑 2025.12.07
+
+### # React - useEffect 호출 시점
+
+- React의 `useEffect`는 컴포넌트의 특정 시점에 자동으로 호출되는 훅
+- **마운트**, **업데이트**, **언마운트** 시점에 호출됨
+
+#### * 1. 마운트 시점 (첫 렌더링 후)
+
+- **컴포넌트가 처음 렌더링되고 나서 호출**
+- 수행 가능한 작업:
+  - 데이터 초기화
+  - 외부 API 호출
+  - 구독(subscription) 설정
+  - 이벤트 리스너 등록
+- 컴포넌트가 처음 마운트될 때 필요한 초기 작업 실행
+
+```javascript
+useEffect(() => {
+  // 컴포넌트 마운트 시 한 번만 실행
+  console.log('컴포넌트가 마운트되었습니다');
+  
+  // API 호출 예시
+  fetchData();
+}, []); // 빈 의존성 배열 = 마운트 시에만 실행#### * 2. 업데이트 시점 (의존성 배열 값 변경)
+```
+
+- **의존성 배열에 지정된 값이 변경될 때마다** 다시 호출
+- 실행 순서:
+  1. 이전 props/state로 **cleanup 함수 먼저 호출**
+  2. 업데이트된 props/state로 **본문 실행**
+
+```javascript
+useEffect(() => {
+  console.log(`count가 ${count}로 변경되었습니다`);
+  
+  return () => {
+    // cleanup 함수 (다음 effect 실행 전 또는 언마운트 시)
+    console.log('cleanup 실행');
+  };
+}, [count]); // count 값이 변경될 때마다 실행#### * 3. 매 렌더링마다 호출 (의존성 배열 생략)
+```
+
+- **의존성 배열을 넘기지 않으면** 매 렌더링마다 호출됨
+- 성능 이슈 발생 가능성 있어 주의 필요
+
+```javascript
+useEffect(() => {
+  // 모든 렌더링마다 실행
+  console.log('컴포넌트가 렌더링되었습니다');
+}); // 의존성 배열 없음#### * 4. 언마운트 시점 (컴포넌트 제거)
+```
+
+- **컴포넌트가 언마운트될 때 cleanup 함수 호출**
+- cleanup 함수는 `useEffect`의 return 값으로 지정
+- 수행 가능한 작업:
+  - 이벤트 리스너 제거
+  - 타이머 해제
+  - 구독 취소
+  - WebSocket 연결 종료
+- useEffect를 통해 발생한 부수효과(side effect) 정리
+
+```javascript
+useEffect(() => {
+  // 이벤트 리스너 등록
+  const handleScroll = () => {
+    console.log('스크롤 이벤트');
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+  
+  return () => {
+    // cleanup: 이벤트 리스너 제거
+    window.removeEventListener('scroll', handleScroll);
+  };
+}, []);
+```
+
+#### * 의존성 배열에 따른 동작
+
+| 의존성 배열 | 실행 시점 | 사용 사례 |
+|------------|----------|----------|
+| `[]` (빈 배열) | 마운트 시 1회만 | 초기 데이터 로딩, 구독 설정 |
+| `[value]` | 마운트 + value 변경 시 | 특정 값에 반응하는 동작 |
+| 생략 | 매 렌더링마다 | 특수한 경우에만 사용 (성능 주의) |
+
+<br>
+
+#### 🔍 [ [매일메일 - useEffect가 호출되는 시점에 대해 설명해 주세요.](https://www.maeil-mail.kr/question/64) ]
+
+<br>
+
 ## 📑 2025.12.06
 
 ### # React - Error Boundary
