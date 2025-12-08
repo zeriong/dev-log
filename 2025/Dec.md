@@ -1,3 +1,159 @@
+
+## 📑 2025.12.08
+
+### # Web - CORS (Cross-Origin Resource Sharing)
+
+- **서로 다른 출처(origin)에서 제공되는 리소스에 접근할 수 있도록 허용하는 정책**
+- 동일 출처 정책(Same-Origin Policy)의 제한을 안전하게 우회하는 메커니즘
+
+#### * 동일 출처 정책 (Same-Origin Policy)
+
+- 브라우저에 보안상의 이유로 기본 적용되는 정책
+- 같은 출처에서 제공되지 않는 리소스는 브라우저가 차단
+- 다른 출처의 서버에 요청 시 응답에 접근 불가
+- 보안을 강화하지만 **합법적인 요청까지 차단될 수 있음**
+
+#### * 출처(Origin)란?
+
+`https://example.com:443/path?query=1`
+- 프로토콜(Protocol): https
+- 도메인(Domain): example.com
+- 포트(Port): 443
+
+위 3가지가 모두 동일해야 **"같은 출처"**
+
+
+#### * CORS가 필요한 이유
+
+- SOP로 인해 정상적인 API 통신도 차단됨
+- 프론트엔드(예: localhost:3000)와 백엔드(예: api.example.com)가 다른 도메인일 경우
+- 외부 API를 사용하는 경우
+- 마이크로서비스 아키텍처에서 서비스 간 통신
+
+#### * CORS 적용 방법 (서버 측)
+
+**1. Access-Control-Allow-Origin 헤더 설정**
+
+```javascript
+// Express.js 예시
+app.use((req, res, next) => {
+  // 모든 출처 허용 (보안상 권장하지 않음)
+  res.header('Access-Control-Allow-Origin', '*');
+  
+  // 또는 특정 출처만 허용
+  res.header('Access-Control-Allow-Origin', 'https://example.com');
+  
+  next();
+});
+```
+
+**2. Access-Control-Allow-Methods 헤더**
+
+```javascript
+// 허용할 HTTP 메서드 지정
+res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');**3. Access-Control-Allow-Headers 헤더**
+
+// 허용할 헤더 지정
+res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+```
+
+#### * 실무 적용 예시
+
+**서버 측 설정 (Node.js/Express)**
+
+```javascript
+const cors = require('cors');
+
+// 옵션 1: 모든 출처 허용 (개발 환경)
+app.use(cors());
+
+// 옵션 2: 특정 출처만 허용 (프로덕션 환경)
+app.use(cors({
+  origin: ['https://example.com', 'https://www.example.com'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // 쿠키 포함 허용
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+```
+
+#### * CORS와 보안: CSRF 공격
+
+**동일 출처 정책이 막고자 하는 공격**
+
+- 주로 **CSRF(Cross-Site Request Forgery)** 공격의 위력을 낮춤
+- CSRF 공격의 원리:
+  1. 피해자가 악성 웹사이트 방문
+  2. 악성 사이트가 피해자의 브라우저를 통해 다른 사이트에 요청
+  3. 피해자의 인증 정보(쿠키 등)가 자동으로 포함됨
+  4. 의도치 않은 요청이 실행됨 (송금, 정보 변경 등)
+
+**SOP의 역할**
+- 악성 사이트에서 다른 출처의 서버로 요청을 보내거나 응답에 접근하는 것을 차단
+- CSRF 공격의 효과를 줄여줌
+
+#### * CORS 요청 흐름
+
+**1. 단순 요청 (Simple Request)** <br>
+2. Access-Control-Allow-Methods 헤더
+
+```javascript
+// 허용할 HTTP 메서드 지정
+res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+```
+
+3. Access-Control-Allow-Headers 헤더
+
+```javascript
+// 허용할 헤더 지정
+res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');ol-Request-Method: POST
+Access-Control-Request-Headers: Content-Type
+
+// 서버 응답
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: POST, GET
+Access-Control-Allow-Headers: Content-Type
+```
+
+#### * 프론트엔드 개발자의 역할
+- CORS는 **서버에서 설정**하는 것
+- 프론트엔드 개발자는:
+  1. 백엔드 개발자에게 클라이언트 도메인 허용 요청
+  2. 개발 환경에서는 프록시 설정으로 우회 가능
+
+**개발 환경 프록시 설정 예시**
+
+```javascript
+// package.json (Create React App)
+{
+  "proxy": "http://localhost:4000"
+}
+
+// vite.config.js (Vite)
+export default {
+  server: {
+    proxy: {
+      '/api': 'http://localhost:4000'
+    }
+  }
+}
+```
+
+#### * 정리
+
+- **CORS**: 다른 출처 간 리소스 공유를 안전하게 허용하는 메커니즘
+- **SOP**: 보안을 위한 브라우저의 기본 정책
+- **서버 측 설정 필요**: Access-Control-* 헤더로 허용 범위 지정
+- **보안**: CSRF 등의 공격을 방어하면서도 필요한 통신은 허용
+
+<br>
+
+#### 🔍 [ [매일메일 - CORS(Cross-Origin Resource Sharing)는 무엇이며 왜 필요한가요?](https://www.maeil-mail.kr/question/78) ]
+
+<br>
+
+---
+
 ## 📑 2025.12.07
 
 ### # React - useEffect 호출 시점
@@ -48,8 +204,10 @@ useEffect(() => {
 useEffect(() => {
   // 모든 렌더링마다 실행
   console.log('컴포넌트가 렌더링되었습니다');
-}); // 의존성 배열 없음#### * 4. 언마운트 시점 (컴포넌트 제거)
+}); // 의존성 배열 없음
 ```
+
+#### * 4. 언마운트 시점 (컴포넌트 제거)
 
 - **컴포넌트가 언마운트될 때 cleanup 함수 호출**
 - cleanup 함수는 `useEffect`의 return 값으로 지정
@@ -89,6 +247,8 @@ useEffect(() => {
 #### 🔍 [ [매일메일 - useEffect가 호출되는 시점에 대해 설명해 주세요.](https://www.maeil-mail.kr/question/64) ]
 
 <br>
+
+---
 
 ## 📑 2025.12.06
 
