@@ -1,4 +1,12 @@
 
+## 📑 2025.12.11
+
+### # 테오콘 2025 - 12/7 Track A 참여 후기
+
+#### ✍🏻 [ [zeriong - [ TEOConf 2025 ] 테오콘 2025 - 12/7 Track A 참여 후기](https://zeriong.tistory.com/94) ]
+
+---
+
 ## 📑 2025.12.08
 
 ### # Web - CORS (Cross-Origin Resource Sharing)
