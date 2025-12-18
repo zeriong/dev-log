@@ -1,3 +1,309 @@
+## 📑 2025.12.18
+
+### # React - Error Boundary를 효과적으로 사용하는 방법
+
+- Error Boundary는 단순히 에러를 잡는 것을 넘어 **전략적으로 배치하고 활용**하는 것이 중요
+- 적절한 에러 처리 전략으로 사용자 경험과 애플리케이션 안정성 향상
+
+#### \* Error Boundary 배치 전략
+
+**1. 계층적 Error Boundary 구조**
+
+```javascript
+// 전역 레벨 - 최상위 폴백
+<GlobalErrorBoundary fallback={<ErrorPage />}>
+  <App>
+    {/* 페이지 레벨 - 페이지별 에러 처리 */}
+    <PageErrorBoundary fallback={<PageError />}>
+      <Dashboard>
+        {/* 컴포넌트 레벨 - 세부 기능별 에러 처리 */}
+        <WidgetErrorBoundary fallback={<WidgetError />}>
+          <ChartWidget />
+        </WidgetErrorBoundary>
+      </Dashboard>
+    </PageErrorBoundary>
+  </App>
+</GlobalErrorBoundary>
+```
+
+**계층별 역할**:
+
+- **전역 레벨**: 예상치 못한 치명적 에러 처리, 전체 앱 보호
+- **페이지 레벨**: 페이지 단위 에러 격리, 다른 페이지는 정상 동작
+- **컴포넌트 레벨**: 세부 기능 에러 격리, 페이지의 나머지 부분은 정상 동작
+
+**2. 기능별 Error Boundary 분리**
+
+```javascript
+// API 호출 관련 에러
+<APIErrorBoundary
+  fallback={<RetryableError onRetry={refetch} />}
+>
+  <UserList />
+</APIErrorBoundary>
+
+// 렌더링 에러
+<RenderErrorBoundary
+  fallback={<ComponentError />}
+>
+  <ComplexChart data={data} />
+</RenderErrorBoundary>
+```
+
+#### \* 재사용 가능한 Error Boundary 구현
+
+**1. Props로 커스터마이징 가능한 구조**
+
+```javascript
+class CustomErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+    };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({ error, errorInfo });
+
+    // 에러 로깅 서비스 (Sentry, LogRocket 등)
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+
+    // 에러 리포팅
+    if (this.props.logError) {
+      console.error("Error Boundary caught:", error, errorInfo);
+    }
+  }
+
+  handleReset = () => {
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+    });
+
+    if (this.props.onReset) {
+      this.props.onReset();
+    }
+  };
+
+  render() {
+    if (this.state.hasError) {
+      // 커스텀 Fallback 컴포넌트
+      if (this.props.fallback) {
+        return typeof this.props.fallback === "function"
+          ? this.props.fallback({
+              error: this.state.error,
+              errorInfo: this.state.errorInfo,
+              resetError: this.handleReset,
+            })
+          : this.props.fallback;
+      }
+
+      // 기본 Fallback UI
+      return (
+        <div>
+          <h2>문제가 발생했습니다</h2>
+          <button onClick={this.handleReset}>다시 시도</button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+**2. 실무 활용 예시**
+
+```javascript
+// 재시도 가능한 에러 UI
+<CustomErrorBoundary
+  fallback={({ error, resetError }) => (
+    <div className="error-container">
+      <h3>데이터를 불러오지 못했습니다</h3>
+      <p>{error.message}</p>
+      <button onClick={resetError}>다시 시도</button>
+    </div>
+  )}
+  onError={(error, errorInfo) => {
+    // Sentry 같은 에러 트래킹 서비스로 전송
+    Sentry.captureException(error, { extra: errorInfo });
+  }}
+  logError={process.env.NODE_ENV === "development"}
+>
+  <DataTable />
+</CustomErrorBoundary>
+```
+
+#### \* Error Boundary와 함께 사용하는 패턴
+
+**1. Suspense와 결합**
+
+```javascript
+<ErrorBoundary fallback={<ErrorUI />}>
+  <Suspense fallback={<LoadingUI />}>
+    <LazyComponent />
+  </Suspense>
+</ErrorBoundary>
+```
+
+**2. React Query와 결합**
+
+```javascript
+// React Query의 에러는 컴포넌트 내에서 처리
+// 렌더링 에러는 Error Boundary가 처리
+<ErrorBoundary fallback={<PageError />}>
+  <QueryClientProvider client={queryClient}>
+    <UserProfile />
+  </QueryClientProvider>
+</ErrorBoundary>
+```
+
+**3. 에러 복구 로직**
+
+```javascript
+function DataComponent() {
+  const [key, setKey] = useState(0);
+
+  return (
+    <ErrorBoundary
+      key={key} // key 변경으로 Error Boundary 리셋
+      fallback={
+        <div>
+          <p>에러 발생</p>
+          <button onClick={() => setKey((k) => k + 1)}>컴포넌트 재생성</button>
+        </div>
+      }
+    >
+      <DataDisplay />
+    </ErrorBoundary>
+  );
+}
+```
+
+#### \* Error Boundary가 잡지 못하는 에러 처리
+
+**1. 이벤트 핸들러 에러**
+
+```javascript
+function Button() {
+  const handleClick = () => {
+    try {
+      // 에러 발생 가능한 로직
+      riskyOperation();
+    } catch (error) {
+      // 이벤트 핸들러는 try-catch로 직접 처리
+      console.error("Button error:", error);
+      showErrorToast(error.message);
+    }
+  };
+
+  return <button onClick={handleClick}>클릭</button>;
+}
+```
+
+**2. 비동기 코드 에러**
+
+```javascript
+function AsyncComponent() {
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchData().catch((err) => {
+      // 비동기 에러는 상태로 관리
+      setError(err);
+    });
+  }, []);
+
+  if (error) {
+    return <div>에러: {error.message}</div>;
+  }
+
+  return <div>데이터 표시</div>;
+}
+```
+
+#### \* 모니터링 및 로깅 통합
+
+```javascript
+class MonitoredErrorBoundary extends React.Component {
+  componentDidCatch(error, errorInfo) {
+    // 에러 트래킹 서비스로 전송
+    const errorReport = {
+      error: error.toString(),
+      errorInfo: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      userId: getCurrentUserId(), // 사용자 정보
+    };
+
+    // Sentry
+    Sentry.captureException(error, {
+      extra: errorReport,
+    });
+
+    // 자체 로깅 시스템
+    logErrorToServer(errorReport);
+  }
+
+  render() {
+    // ... 렌더링 로직
+  }
+}
+```
+
+#### \* 실무 Best Practices
+
+1. **세분화된 Error Boundary 배치**
+
+   - 전체 앱을 하나의 Error Boundary로 감싸지 말 것
+   - 기능별, 페이지별로 적절히 분리
+
+2. **의미 있는 에러 메시지**
+
+   - 사용자에게는 친화적인 메시지
+   - 개발자에게는 상세한 에러 정보
+
+3. **복구 메커니즘 제공**
+
+   - 재시도 버튼
+   - 이전 페이지로 돌아가기
+   - 홈으로 이동
+
+4. **에러 모니터링**
+
+   - 프로덕션 환경에서 발생하는 모든 에러 추적
+   - 패턴 분석으로 근본 원인 파악
+
+5. **개발 vs 프로덕션 환경 구분**
+   - 개발: 상세한 에러 스택 표시
+   - 프로덕션: 사용자 친화적 메시지
+
+#### \* 정리
+
+- Error Boundary는 **전략적으로 배치**하여 에러를 적절히 격리
+- **재사용 가능한 구조**로 구현하여 유지보수성 향상
+- **에러 모니터링**과 통합하여 프로덕션 이슈 추적
+- Error Boundary가 **잡지 못하는 에러**는 별도 처리 필요
+- **사용자 경험**을 최우선으로 고려한 에러 처리
+
+<br>
+
+#### 🔍 [ [카카오 엔터테인먼트 - React의 Error Boundary를 이용하여 효과적으로 에러 처리하기](https://tech.kakaoent.com/front-end/2022/221110-error-boundary/) ]
+
+<br>
+
+---
 
 ## 📑 2025.12.11
 
