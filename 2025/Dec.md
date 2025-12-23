@@ -1,3 +1,342 @@
+## 📑 2025.12.23
+
+### # Frontend - 모듈 번들러 (Module Bundler)
+
+- **여러 개의 모듈(파일)을 하나 또는 여러 개의 번들 파일로 묶는 도구**
+- 현대 웹 개발에서 수많은 자바스크립트 파일과 다양한 자산을 효율적으로 관리하고 최적화
+- **의존성 관리, 파일 수 감소, 최적화된 배포** 가능
+
+#### \* 모듈 번들러의 개념
+
+**과거 방식**
+
+```html
+<!-- 예전: 여러 script 태그로 파일 로딩 -->
+<script src="utils.js"></script>
+<script src="data.js"></script>
+<script src="main.js"></script>
+```
+
+**현재 방식**
+
+```javascript
+// 모듈 시스템 사용
+import { utils } from "./utils.js";
+import { data } from "./data.js";
+
+// 번들러가 이를 하나의 bundle.js로 통합
+```
+
+파일이 여러 개로 나뉘어 있는 경우, 모듈 번들러는 이를 분석하고 **하나의 번들 파일로 만들어줌**
+
+#### \* 모듈 번들러가 필요한 이유
+
+**모듈 번들러가 없던 시절의 문제**
+
+1. **HTTP 요청 증가로 성능 저하**
+
+   - 파일 수가 많으면 각각 별도 요청 필요
+   - 네트워크 오버헤드 증가
+
+2. **파일 간 의존성 관리 어려움**
+
+   - 로딩 순서 중요 (의존성 있는 파일은 먼저 로드해야 함)
+   - 수동으로 관리하기 어려움
+
+3. **글로벌 스코프 오염 가능성**
+   - 모든 변수가 전역에 노출
+   - 네이밍 충돌 위험
+
+#### \* 모듈 번들러의 주요 역할
+
+1. **의존성 분석**
+
+   - 어떤 파일이 어떤 모듈을 사용하는지 파악
+   - 의존성 그래프 생성
+
+2. **파일 결합**
+
+   - 관련 모듈들을 하나로 묶어서 로딩 속도 개선
+   - HTTP 요청 수 감소
+
+3. **최적화**
+
+   - 코드 압축 (minification)
+   - 사용하지 않는 코드 제거 (tree shaking)
+   - 코드 스플리팅
+
+4. **비JS 자산 처리**
+   - CSS, 이미지, 폰트 등도 import하여 번들링 가능
+   - 모든 자산을 모듈로 관리
+
+#### \* 대표적인 모듈 번들러
+
+**1. Webpack**
+
+- **가장 널리 사용되는 모듈 번들러**
+- 복잡한 웹 애플리케이션에 적합
+- Entry, Output, Loader, Plugin 등 다양한 설정 요소
+- CSS, 이미지, 폰트 등 모든 웹 자산 번들링 가능
+
+**장점**
+
+- 높은 유연성과 다양한 설정
+- 풍부한 플러그인 생태계
+- 기업 환경에서 검증됨
+
+**단점**
+
+- 설정이 복잡하고 학습 곡선이 높음
+- 빌드 속도가 상대적으로 느림
+
+**적합한 경우**
+
+- 복잡한 기업형 프로젝트
+- 커스터마이징이 중요한 프로젝트
+
+```javascript
+// webpack.config.js 예시
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    filename: "bundle.js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+};
+```
+
+**2. Vite**
+
+- **ESM(ES Module) 기반의 최신 번들러**
+- Rollup 위에 구축
+- 개발 서버 속도가 매우 빠름
+- HMR(Hot Module Replacement) 기능 지원
+
+**장점**
+
+- 개발 환경에서 즉시 시작 (No Bundle 개념)
+- 설정 파일이 직관적
+- React/Vue 등과 연동이 간편
+- 빌드 시 Rollup 사용으로 성능 우수
+
+**단점**
+
+- 레거시 브라우저 지원에 추가 설정 필요
+- 생태계가 상대적으로 작음
+
+**적합한 경우**
+
+- 빠른 개발 환경이 필요한 경우
+- 모던 프레임워크 사용 시
+
+```javascript
+// vite.config.js 예시
+export default {
+  server: {
+    port: 3000,
+  },
+  build: {
+    outDir: "dist",
+  },
+};
+```
+
+**3. Rollup**
+
+- **라이브러리 번들링에 최적화**된 모듈 번들러
+- Tree shaking 기능이 강력
+- 결과물이 작고 최적화됨
+- ES 모듈 중심으로 구성
+
+**장점**
+
+- 깨끗하고 작은 번들 생성
+- 강력한 tree shaking
+- 코드 스플리팅 지원
+- 플러그인 생태계 우수
+
+**단점**
+
+- 일반 웹앱보다는 라이브러리에 특화
+- 복잡한 애플리케이션에는 설정이 까다로움
+
+**적합한 경우**
+
+- JS 라이브러리나 NPM 패키지 제작
+- 작은 번들 크기가 중요한 경우
+
+```javascript
+// rollup.config.js 예시
+export default {
+  input: "src/index.js",
+  output: {
+    file: "dist/bundle.js",
+    format: "esm",
+  },
+};
+```
+
+**4. Parcel**
+
+- **설정이 거의 필요 없는 (zero config) 번들러**
+- 파일 타입을 자동 인식
+- 필요한 로더와 플러그인을 내부적으로 설정
+
+**장점**
+
+- 빠르게 시작 가능
+- 설정 파일 불필요
+- 빌드 성능 우수
+- 캐싱 및 병렬 처리로 성능 향상
+
+**단점**
+
+- 고도화된 설정에는 한계
+- 대규모 프로젝트에서는 제약
+
+**적합한 경우**
+
+- 소규모 프로젝트
+- 입문자나 빠른 프로토타이핑
+
+```bash
+# 설정 없이 바로 실행
+parcel index.html
+```
+
+**5. Turbopack**
+
+- **Vercel에서 개발한 Rust 기반 차세대 번들러**
+- Webpack의 창시자가 개발에 참여한 Webpack 후속작
+- Next.js 13부터 기본 개발 서버로 채택
+
+**장점**
+
+- 증분 빌드로 빠른 개발 환경
+- 강력한 캐싱 시스템
+- 병렬 처리로 성능 극대화
+- Next.js와 완벽한 통합
+
+**단점**
+
+- 현재 베타 상태
+- Next.js 외 생태계는 미흡
+- 프로덕션 사용 시 신중히 고려 필요
+
+**적합한 경우**
+
+- Next.js 13+ 기반 대규모 프로젝트
+- 최신 성능 최적화가 필요한 경우
+
+```javascript
+// next.config.js
+module.exports = {
+  experimental: {
+    turbo: {
+      // Turbopack 설정
+    },
+  },
+};
+```
+
+#### \* 번들러 비교표
+
+| 번들러        | 속도      | 설정 난이도 | 주요 용도       | 특징                       |
+| ------------- | --------- | ----------- | --------------- | -------------------------- |
+| **Webpack**   | 보통      | 높음        | 복잡한 웹앱     | 높은 유연성, 풍부한 생태계 |
+| **Vite**      | 매우 빠름 | 낮음        | 모던 웹앱       | 즉시 시작, ESM 기반        |
+| **Rollup**    | 빠름      | 보통        | 라이브러리      | 강력한 tree shaking        |
+| **Parcel**    | 빠름      | 매우 낮음   | 소규모 프로젝트 | Zero config                |
+| **Turbopack** | 매우 빠름 | 낮음        | Next.js         | Rust 기반, 증분 빌드       |
+
+#### \* 번들러 선택 가이드
+
+```
+프로젝트 성격에 따른 추천:
+
+- 복잡한 기업형 프로젝트
+   → Webpack
+   (높은 유연성, 복잡한 요구사항 대응)
+
+- 빠른 개발 환경 + 모던 프레임워크
+   → Vite
+   (React, Vue, Svelte와 함께 빠른 개발)
+
+- JS 라이브러리나 NPM 패키지 제작
+   → Rollup
+   (작은 번들, 강력한 tree shaking)
+
+- 간단한 사이드 프로젝트 또는 입문
+   → Parcel
+   (설정 없이 바로 시작)
+
+- Next.js 기반 대규모 프로젝트
+   → Turbopack
+   (빠른 HMR, 증분 빌드 - 베타 주의)
+```
+
+#### \* 주요 개념
+
+**Tree Shaking**
+
+```javascript
+// utils.js
+export function used() {
+  /* ... */
+}
+export function unused() {
+  /* ... */
+}
+
+// main.js
+import { used } from "./utils";
+
+// 번들 결과: unused는 제거됨 (tree shaking)
+```
+
+**Code Splitting**
+
+```javascript
+// 동적 import로 코드 분할
+const module = await import("./heavy-module.js");
+
+// 결과: heavy-module.js는 별도 청크로 분리
+// 필요할 때만 로딩 (Lazy Loading)
+```
+
+**Hot Module Replacement (HMR)**
+
+```javascript
+// 개발 중 파일 수정 시
+// 전체 페이지 새로고침 없이
+// 변경된 모듈만 교체
+// → 개발 속도 향상
+```
+
+#### \* 정리
+
+- 모듈 번들러는 **웹 애플리케이션의 성능과 유지 보수성을 높이는 핵심 도구**
+- 각 번들러는 **목적과 사용성에 따라 특화된 강점** 보유
+- **프로젝트의 성격에 맞는 도구를 선택**하는 것이 중요
+- 현대 웹 개발에서는 필수적인 도구
+
+<br>
+
+#### 🔍 [ [Dachae' DevLog - [모듈 번들러] 프론트엔드 필수 도구의 개념과 대표 번들러 비교](https://dachaes-devlogs.tistory.com/56) ]
+
+<br>
+
+---
+
+
 ## 📑 2025.12.18
 
 ### # React - Error Boundary를 효과적으로 사용하는 방법
