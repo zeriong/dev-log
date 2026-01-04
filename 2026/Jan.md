@@ -1,3 +1,32 @@
+
+## 📑 2026.01.04
+
+### # Web Server - NginX설정으로 SPA 작동 설정하기
+
+`개요: 사내 서비스는 IaaS를 활용하기 때문에 빌드된 React파일을 배포할 때 NginX를 별도로 설정하고 다뤄야 하는데, 이 때 초기 설정해두었던 코드의 의미를 망각하여 SPA가 작동하도록 만드는 이유에 대해서 답변하지 못하는 불상사가 생겨 리마인드를 위해 작성`
+
+```nginx
+location / {
+  # 경로와 index 설정
+  root /www/service-app;
+  index index.html index.htm;
+
+  # fallback 처리
+  try_files $uri /index.html;
+}
+```
+
+위처럼 fallback 처리를 해주지 않는다면 실제 경로에 아무것도 존재하지 않기 때문에 404가 발생.<br>
+`try_files $url`을 통해 fallback 처리를 해주면 추가 경로가 없는 경우 지속적으로 index.html을 바라보게 되고,<br>
+JS를 실행을 통해 Client Routing이 가능하게 만들어줌
+
+
+#### [🔍 [ 시소 - Nginx를 통한 SPA 앱 배포 시 주의 및 설정법 (404 핸들링, 정적 애셋 처리) ](https://velog.io/@seesaw/Nginx%EB%A5%BC-%ED%86%B5%ED%95%9C-SPA-%EC%95%B1-%EB%B0%B0%ED%8F%AC-%EC%8B%9C-%EC%A3%BC%EC%9D%98-%EB%B0%8F-%EC%84%A4%EC%A0%95%EB%B2%95-404-%ED%95%B8%EB%93%A4%EB%A7%81) ]
+
+<br>
+
+---
+
 ## 📑 2026.01.02
 
 ### # Javascript - Prototype vs Class
