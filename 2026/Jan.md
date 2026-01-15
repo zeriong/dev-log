@@ -1,4 +1,45 @@
 
+## 📑 2026.01.15
+
+### # Tanstack Query - gcTime & staleTime
+
+`개요: gcTime과 staleTime에 대한 이해도가 옅어져서 복습`
+
+#### gcTime
+- 가비지컬렉션 수집 대상으로 지정되는 시간으로 **캐싱데이터를 가지고 있는 시간**이라고 이해할 수 있음
+
+#### staleTime
+- "해당 데이터가 신선하다"의 기준으로, **(재)사용기한** 같은 것
+
+<br>
+
+#### * 주요 특징 및 차이점
+
+- **gcTime**
+  - useQuery()를 사용한 컴포넌트가 **unmount되면 유지된다.**
+  - 의미: "이 시간동안 **App을 감싼 Provider에서 캐시**를 가지고 있을게"
+  - 시간이 끝나면 Provider에 저장된 쿼리 캐시데이터 삭제
+- **staleTime**
+  - useQuery()를 사용한 컴포넌트가 **unmount되면 초기화된다.**
+  - 의미: "이 시간동안 **캐시가 남아있다면** refetch하지 않고 **캐시 사용할게**"
+  - 시간이 끝나거나 unmount 시 refetch
+
+#### * 장점
+1. staleTime이 남아있다면 gcTime동안 refetch하지 않아 캐싱 데이터 기반 화면을 빠르게 제공(UX)
+2. 이로 인한 통신 절차가 생략되어 비용 절감(최적화)
+
+<br>
+
+#### Q. staleTime은 unmount되면 stale(신선하지 않은)상태가 되어서 해당 컴포넌트에 다시 접근 시 refetch가 되는데 gcTime은 그럼 왜 필요할까?<br>
+**`stale상태로 refetch를 한다고 해도 gcTime이 유효하다면 refetch가 일어나 데이터가 갱신되기 전까진 이전데이터를 보여주기 때문에 즉시 화면을 보여주게 되어 UX관점에서 더 나은 방향성이라고 볼 수 있다.( 기다리지 않아도 볼 수 있는 데이터가 이미 존재하기 때문 )`**
+
+
+#### [🔍 [ ssund - TanStack Query의 gcTime과 staleTime 비교 ](https://ssund.tistory.com/181) ]
+
+<br>
+
+---
+
 ## 📑 2026.01.04
 
 ### # Web Server - NginX설정으로 SPA 작동 설정하기
