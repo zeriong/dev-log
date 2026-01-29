@@ -151,13 +151,7 @@ JS를 실행을 통해 Client Routing이 가능하게 만들어줌
 #### * 결론
 
 `Class는 Prototype의 기능을 안전하고 편리하게 포장한 도구이므로, 실무에서는 Class를 사용하되 그 뿌리인 Prototype의 원리를 정확히 이해하는 것이 중요하다.`
+
 <br>
 
-#### [🔍 [ WikiDocs - JavaScript Prototype과 Class ( 5. 클래스와 프로토타입의 차이점 ) ](https://wikidocs.net/251888) ] 내부적으로 프로토타입을 사용하지만, 더 엄격한 규칙과 명확한 상속 구조를 제공한다.
-
-#### * 주요 특징 및 차이점
-
-- **프로토타입 (Prototype)**
-  - 생성자 함수(function)와 .prototype 속성을 사용하여 상속 구현
-  - 함수 호이스팅이 적용되어 선언 전에도 인스턴스 생성 가능
-  - new 키워드
+#### [🔍 [ WikiDocs - JavaScript Prototype과 Class ( 5. 클래스와 프로토타입의 차이점 ) ](https://wikidocs.net/251888) ] 
