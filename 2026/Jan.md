@@ -1,3 +1,48 @@
+## 📑 2026.01.30
+
+### # ClassName - Container vs Wrapper
+
+`ClassName을 네이밍할 때 기보적으로 차이를 두지 않고서 사용해도 무방하지만, 엄격하게 구분을 한다고 하면 프로그래밍 관행 상으로 container와 wrapper의 원론적 기능상 의미에 따라 차이를 파악하는 것이 가능하다고 함`
+
+#### * 원론적 의미 구분
+
+- **Container:** 하나 이상의 요소를 포함
+- **Wrapper:** 하나의 요소를 포함
+
+#### * 참고 내용
+
+- 자세한 의미론적 구분법을 파악하기 위해서는 소프트웨어 공학 측면에서 'Adapter pattern' 내용을 참고할 수 있음
+- DOM, XML 등에 적용되는 패턴으로 wrapper의 특징을 이해하는 데에 도움을 줄 수 있다고 함
+- 하나의 요소를 다른 데에 적용할 수 있도록 하는 adapter 역할을 하는 것이 wrapper라고 기술되어 있음
+
+#### * 작성 예시
+
+```markdown
+<ul class="items-container">
+    <li class="item-wrapper">
+        <div class="item">...</div>
+    </li>
+    <li class="item-wrapper">
+        <div class="item">...</div>
+    </li>
+    <li class="item-wrapper">
+        <div class="item">...</div>
+    </li>
+    <li class="item-wrapper">
+        <div class="item">...</div>
+    </li>
+    <li class="item-wrapper">
+        <div class="item">...</div>
+    </li>
+</ul>
+```
+
+#### [🔍 [ UX 개발 연구실 - CSS 클래스 네이밍 시 container vs wrapper 차이 구분하기 ](https://uxdev.org/entry/CSS-%ED%81%B4%EB%9E%98%EC%8A%A4-%EB%84%A4%EC%9D%B4%EB%B0%8D-%EC%8B%9C-container-vs-wrapper-%EC%B0%A8%EC%9D%B4-%EA%B5%AC%EB%B6%84%ED%95%98%EA%B8%B0) ]
+
+<br>
+
+---
+
 ## 📑 2026.01.29
 
 ### # Infra - CDN
